@@ -1,7 +1,7 @@
 from flask import Flask, request
 from util.Log import Log
 from api.API import BJUTLabAPI
-
+from util.util import none_check
 from flask_cors import CORS
 
 app = Flask('BJUTLabServer')
@@ -31,12 +31,16 @@ def get_inform_brief():
     number = request.args.get('number', None, type=int)
     page_index = request.args.get('pageIndex', None, type=int)
     filter_str = request.args.get('filter', None, type=str)
-    if type_code is None or number is None or page_index is None:
-        return {
-            'code': 400,
-            'err': 'missing argument'
-        }
+    check_result = none_check(400, 'Missing parameter. Index: {}',
+                              type_code, number, page_index)
+    if check_result['hasNone']:
+        return check_result['msg']
     return api.inform.get_inform_brief(type_code, number, page_index, filter_str)
+
+
+@app.route('/inform', methods=['GET'])
+def get_inform():
+    type_code = request.args.get('type', None, type=int)
 
 
 if __name__ == '__main__':
