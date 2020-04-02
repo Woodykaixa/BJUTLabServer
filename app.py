@@ -5,9 +5,9 @@ from api.API import BJUTLabAPI
 from flask_cors import CORS
 
 app = Flask('BJUTLabServer')
-logger = Log.get_logger(__name__)
+logger = Log.get_logger('BJUTLabServer')
 cors = CORS(app)
-api = BJUTLabAPI(logger)
+api = BJUTLabAPI()
 
 
 @app.route('/')
