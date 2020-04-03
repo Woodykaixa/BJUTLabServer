@@ -56,10 +56,10 @@ class SQLHandler:
             cursor = self._connection.cursor()
             cursor.callproc(proc_name, param + (0,))
             res = cursor.fetchmany(top_n)
-            cursor.execute('select @_' + proc_name + '_0')
+            cursor.execute('select @_' + proc_name + '_' + str(len(param)))
             out_param = cursor.fetchone()
             cursor.close()
-            return res, out_param
+            return res, out_param[0]
         except sql_error.OperationalError as oe:
             if oe.args[0] == 2006:
                 self._logger.info('数据库连接断开，重新连接。')

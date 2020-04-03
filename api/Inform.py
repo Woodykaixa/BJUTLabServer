@@ -1,11 +1,13 @@
 from exception import exception
-from flask import jsonify
+import json
 
 
 class Inform:
     __inform_counter = 0
     __get_inform_temporary_type_list = ['create', 'expire', 'principal']
     __get_inform_type_list = ['create', 'expire', 'principal']
+    __get_inform_procedure_list = ['get_inform_temporary_by_id',
+                                   'get_inform_long_term_by_id']
 
     def __init__(self, logger, sql):
         if Inform.__inform_counter != 0:
@@ -22,7 +24,7 @@ class Inform:
     def get_inform_brief(self, type_code: int, number: int, page_index: int, filter_str: str):
         try:
             api_get_inform_brief = self.__get_inform_brief_method_list[type_code]
-            return jsonify(api_get_inform_brief(number, page_index, filter_str))
+            return json.dumps(api_get_inform_brief(number, page_index, filter_str), ensure_ascii=False)
         except IndexError:
             return {
                 'code': 400,
@@ -33,15 +35,14 @@ class Inform:
         informs = []
 
         for data in dataset:
-            self._logger.info('data: ' + str(data))
             inform_brief = {
                 'id': data[0],
                 'type': type_code,
                 'title': data[1],
-                'create': data[3]
+                'create': str(data[3])
             }
             if type_code == 0:
-                inform_brief['expire'] = data[4]
+                inform_brief['expire'] = str(data[4])
             informs.append(inform_brief)
         return informs
 
@@ -102,3 +103,35 @@ class Inform:
         inform.extend(inform_temp)
         inform.extend(inform_long)
         return inform
+
+    def get_inform(self, type_code: int, inform_id: int):
+        try:
+            proc_name = Inform.__get_inform_procedure_list[type_code]
+            return self.__get_inform(proc_name, inform_id)
+        except IndexError:
+            return {
+                'code': 400,
+                'err': 'Invalid type: {}'.format(type_code)
+            }
+
+    def __get_inform(self, proc_name: str, inform_id: int):
+        dataset, code = self._sql.run_proc(proc_name, 1, (inform_id,))
+        self._logger.info(str(dataset))
+        self._logger.info(str(code))
+        data = dataset[0]
+        if code == 0:
+            inform = {
+                'title': data[1],
+                'content': data[2],
+                'create': str(data[3])
+            }
+            if proc_name == 'get_inform_temporary_by_id':
+                inform['expire'] = str(data[4])
+                inform['principal_id'] = data[5]
+            else:
+                inform['principal_id'] = data[4]
+            return json.dumps(inform, ensure_ascii=False)
+        return {
+            'code': 404,
+            'err': 'Inform does not exist'
+        }

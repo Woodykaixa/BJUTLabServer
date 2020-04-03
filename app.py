@@ -41,6 +41,11 @@ def get_inform_brief():
 @app.route('/inform', methods=['GET'])
 def get_inform():
     type_code = request.args.get('type', None, type=int)
+    inform_id = request.args.get('id', None, type=int)
+    check_result = none_check(400, 'Missing parameter', type_code, inform_id)
+    if check_result['hasNone']:
+        return check_result['msg']
+    return api.inform.get_inform(type_code, inform_id)
 
 
 if __name__ == '__main__':

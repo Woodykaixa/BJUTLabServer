@@ -5,6 +5,15 @@
     <title>Test_api</title>
 </head>
 <body>
-<script src="./test_api.js"></script>
+<script>
+    const apiPrefix = 'http://127.0.0.1:5000/';
+    fetch(apiPrefix + 'inform?type=1&id=1').then(res => {
+        if (res.ok) {
+            return res.json();
+        }
+    }).then(json => {
+        document.write(JSON.stringify(json))
+    });
+</script>
 </body>
 </html>
