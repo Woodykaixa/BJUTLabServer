@@ -12,7 +12,8 @@ api = BJUTLabAPI()
 
 @app.route('/')
 def hi():
-    return 'hi'
+    return 'Welcome to use BJUTLab APIs.' \
+           'Last modified: 2020-04-03'
 
 
 @app.route('/login', methods=['POST'])
