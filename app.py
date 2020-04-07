@@ -1,19 +1,26 @@
 from flask import Flask, request
-from util.Log import Log
-from api.API import BJUTLabAPI
-from util.util import none_check
 from flask_cors import CORS
+from werkzeug import exceptions
+
+import exception
+from api.API import BJUTLabAPI
+from blueprints import Auth, Inform
+from utilities.Log import Log
+from utilities.util import make_error_response
 
 app = Flask('BJUTLabServer')
 logger = Log.get_logger('BJUTLabServer')
 cors = CORS(app)
-api = BJUTLabAPI()
+api = BJUTLabAPI.get_instance()
+
+app.register_blueprint(Auth.AuthBP)
+app.register_blueprint(Inform.InformBP)
 
 
 @app.route('/')
 def hi():
     return 'Welcome to use BJUTLab APIs.' \
-           'Last modified: 2020-04-03'
+           'Last modified: 2020-04-07'
 
 
 @app.route('/login', methods=['POST'])
@@ -26,27 +33,14 @@ def register():
     return api.test.register(request)
 
 
-@app.route('/inform_brief', methods=['GET'])
-def get_inform_brief():
-    type_code = request.args.get('type', None, type=int)
-    number = request.args.get('number', None, type=int)
-    page_index = request.args.get('pageIndex', None, type=int)
-    filter_str = request.args.get('filter', None, type=str)
-    check_result = none_check(400, 'Missing parameter. Index: {}',
-                              type_code, number, page_index)
-    if check_result['hasNone']:
-        return check_result['msg']
-    return api.inform.get_inform_brief(type_code, number, page_index, filter_str)
+@app.errorhandler(exception.ParameterException)
+def handle_parameter_exception(e):
+    return make_error_response(e)
 
 
-@app.route('/inform', methods=['GET'])
-def get_inform():
-    type_code = request.args.get('type', None, type=int)
-    inform_id = request.args.get('id', None, type=int)
-    check_result = none_check(400, 'Missing parameter', type_code, inform_id)
-    if check_result['hasNone']:
-        return check_result['msg']
-    return api.inform.get_inform(type_code, inform_id)
+@app.errorhandler(exceptions.NotFound)
+def handle_not_found(e):
+    return make_error_response(e)
 
 
 if __name__ == '__main__':

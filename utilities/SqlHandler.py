@@ -1,5 +1,5 @@
 import pymysql
-from util.Log import Log
+from utilities.Log import Log
 import pymysql.err as sql_error
 import json
 
