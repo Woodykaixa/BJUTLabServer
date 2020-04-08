@@ -56,8 +56,8 @@ class InformAPI:
         if filter_str is None:
             dataset, count = self._sql.run_proc(proc_name, number, param + (None, None, None))
         else:
-            filter_pair = str(filter_str).split('=')
-            filter_param = [None, None, 0]
+            filter_pair = str(filter_str).split('->')
+            filter_param = [None, None]
 
             try:
                 type_code_index = InformAPI.__get_inform_temporary_type_list.index(filter_pair[0])
@@ -66,6 +66,8 @@ class InformAPI:
                 raise exception.ParameterException(400, 'Invalid filter: {}'.format(e))
 
             param_final = param + tuple(filter_param)
+            self._logger.info('proc: ' +proc_name)
+            self._logger.info('param: '+str(param_final))
             dataset, count = self._sql.run_proc(proc_name, number, param_final)
 
         informs = self.__parse_dataset_for_get_inform_brief(dataset, 0)

@@ -19,8 +19,8 @@ app.register_blueprint(Inform.InformBP)
 
 @app.route('/')
 def hi():
-    return 'Welcome to use BJUTLab APIs.' \
-           'Last modified: 2020-04-07'
+    return 'Welcome to use BJUTLab APIs.\n' \
+           'Last modified: 2020-04-08 21:29:50'
 
 
 @app.route('/login', methods=['POST'])
