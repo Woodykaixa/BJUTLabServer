@@ -1,12 +1,16 @@
-import pymysql
-from utilities.Log import Log
-import pymysql.err as sql_error
 import json
+
+import pymysql
+import pymysql.err as sql_error
+
+from .Log import Log
 
 
 class SQLHandler:
     def __init__(self, conf_path: str):
         self._logger = Log.get_logger('BJUTLabServer.SQLHandler')
+        self._logger.info('Read database settings from path: {}'.format(conf_path))
+
         self._db_config = SQLHandler.read_config(conf_path)
         self._connection = None
         self.connect_database()

@@ -1,6 +1,6 @@
 import json
 
-import exception
+from BJUTLabServer import exception
 
 
 class InformAPI:

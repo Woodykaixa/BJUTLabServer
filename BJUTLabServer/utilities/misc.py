@@ -1,4 +1,4 @@
-import exception
+from .. import exception
 import json
 from flask import make_response
 from werkzeug.datastructures import ImmutableMultiDict

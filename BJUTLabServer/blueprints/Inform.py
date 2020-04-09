@@ -1,6 +1,7 @@
 from flask import Blueprint, request
-from utilities import none_check
-from api.API import BJUTLabAPI
+
+from BJUTLabServer.utilities import none_check
+from ..api import BJUTLabAPI
 
 api = BJUTLabAPI.get_instance()
 

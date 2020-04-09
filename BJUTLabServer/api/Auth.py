@@ -1,13 +1,13 @@
-from flask import session, request, make_response
+from flask import session, make_response
 
-from exception import APIReinitializationError, ParameterException
-from utilities import SqlHandler, Encryptor
+from ..exception import APIReinitializationError, ParameterException
+from ..utilities import Encryptor, SQLHandler
 
 
 class AuthAPI:
     __auth_instance = None
 
-    def __init__(self, logger, sql: SqlHandler.SQLHandler):
+    def __init__(self, logger, sql: SQLHandler):
         if AuthAPI.__auth_instance is not None:
             raise APIReinitializationError('Auth')
         self._logger = logger

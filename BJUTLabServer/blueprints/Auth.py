@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 
-from api.API import BJUTLabAPI
-from utilities import Log, get_form_data_by_key
+from ..utilities import Log, get_form_data_by_key
+from ..api import BJUTLabAPI
 
 AuthBP = Blueprint('Auth', __name__, url_prefix='/Auth')
 api = BJUTLabAPI.get_instance()
