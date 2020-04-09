@@ -5,10 +5,10 @@ from werkzeug import exceptions
 import exception
 from api.API import BJUTLabAPI
 from blueprints import Auth, Inform
-from utilities.Log import Log
-from utilities.util import make_error_response
+from utilities import Log, make_error_response
 
 app = Flask('BJUTLabServer')
+app.config['SECRET_KEY'] = '13FASLJ02RL'
 logger = Log.get_logger('BJUTLabServer')
 cors = CORS(app)
 api = BJUTLabAPI.get_instance()

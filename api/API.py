@@ -1,9 +1,8 @@
 import exception
-from utilities.SqlHandler import SQLHandler
+from utilities import SQLHandler, Log
+from .Auth import AuthAPI
 from .Inform import InformAPI
 from .Test import Test
-from .Auth import AuthAPI
-from utilities.Log import Log
 
 
 class BJUTLabAPI:
