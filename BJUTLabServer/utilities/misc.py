@@ -1,7 +1,10 @@
-from .. import exception
 import json
-from flask import make_response
+from functools import wraps
+
+from flask import make_response, session
 from werkzeug.datastructures import ImmutableMultiDict
+
+from .. import exception
 
 
 def none_check(code: int, msg: str, *args):
@@ -50,3 +53,15 @@ def make_error_response(e: exception.WerkzeugException.HTTPException):
         }), e.code))
     res.headers['Content-Type'] = 'application/json'
     return res
+
+
+def login_required(view):
+    @wraps(view)
+    def wrapped_view(*args, **kwargs):
+        if 'name' in session and 'school_id' in session:
+            return view(*args, **kwargs)
+        unauthorized_exception = exception.WerkzeugException.Unauthorized
+        unauthorized_exception.description = 'Login Required'
+        raise unauthorized_exception
+
+    return wrapped_view

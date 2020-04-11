@@ -51,11 +51,7 @@ class AuthAPI:
         }
 
     def test_session(self):
-        if 'name' in session:
-            self._logger.info('hello, {}'.format(session['name']))
-            return {
-                'msg': 'hello, {}'.format(session['name'])
-            }
+        self._logger.info('hello, {}'.format(session['name']))
         return {
-            'msg': 'not login'
+            'msg': 'hello, {}'.format(session['name'])
         }

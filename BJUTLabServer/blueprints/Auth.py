@@ -1,8 +1,8 @@
-from flask import Blueprint, request, redirect
-from flask_cors import CORS
+from flask import Blueprint, request
 
 from ..api import BJUTLabAPI
 from ..utilities import Log, get_form_data_by_key
+from ..utilities.misc import login_required
 
 AuthBP = Blueprint('Auth', __name__, url_prefix='/Auth')
 
@@ -30,5 +30,6 @@ def login():
 
 
 @AuthBP.route('/test_session', methods=['GET'])
+@login_required
 def test_session():
     return api.auth.test_session()

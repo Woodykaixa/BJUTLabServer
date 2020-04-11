@@ -1,10 +1,7 @@
-from flask import Flask
-from flask_cors import CORS
-from werkzeug.exceptions import NotFound
-
-
 def create_app():
-    from .exception import ParameterException
+    from flask import Flask
+    from flask_cors import CORS
+    from .exception import ParameterException, WerkzeugException
     from .utilities import make_error_response
     from .blueprints import InformBP, AuthBP
 
@@ -25,7 +22,11 @@ def create_app():
     def handle_parameter_exception(e):
         return make_error_response(e)
 
-    @app.errorhandler(NotFound)
+    @app.errorhandler(WerkzeugException.NotFound)
+    def handle_not_found(e):
+        return make_error_response(e)
+
+    @app.errorhandler(WerkzeugException.Unauthorized)
     def handle_not_found(e):
         return make_error_response(e)
 
