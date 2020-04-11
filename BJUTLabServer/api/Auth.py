@@ -1,4 +1,4 @@
-from flask import session, make_response
+from flask import session, g
 
 from ..exception import APIReinitializationError, ParameterException
 from ..utilities import Encryptor, SQLHandler
@@ -37,18 +37,25 @@ class AuthAPI:
         dataset, code = self._sql.run_proc(proc_name, 1, (school_id, md5_pwd))
         self._logger.info(str(dataset))
         self._logger.info(code)
+        g.sid = school_id
         if code == 0:
             session.clear()
             session['school_id'] = school_id
             session['name'] = dataset[0][0]
-
-            r = make_response({
+            return {
                 'success': True,
                 'name': dataset[0][0]
-            })
-            r.headers['Access-Control-Allow-Credentials'] = 'true'
-            self._logger.info(str(r.headers))
-            return r
+            }
         return {
             'success': False
+        }
+
+    def test_session(self):
+        if 'name' in session:
+            self._logger.info('hello, {}'.format(session['name']))
+            return {
+                'msg': 'hello, {}'.format(session['name'])
+            }
+        return {
+            'msg': 'not login'
         }
