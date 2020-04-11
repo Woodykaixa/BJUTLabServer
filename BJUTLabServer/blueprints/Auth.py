@@ -29,6 +29,15 @@ def login():
     return api.auth.login(school_id, password, user_type)
 
 
+@AuthBP.route('/change_password', methods=['POST'])
+@login_required
+def change_password():
+    form = request.form
+    old = get_form_data_by_key(form, 'old')
+    new = get_form_data_by_key(form, 'new')
+    return api.auth.change_password(old, new)
+
+
 @AuthBP.route('/test_session', methods=['GET'])
 @login_required
 def test_session():

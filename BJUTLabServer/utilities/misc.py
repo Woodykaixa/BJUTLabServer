@@ -58,7 +58,7 @@ def make_error_response(e: exception.WerkzeugException.HTTPException):
 def login_required(view):
     @wraps(view)
     def wrapped_view(*args, **kwargs):
-        if 'name' in session and 'school_id' in session:
+        if 'name' in session and 'school_id' in session and 'password' in session:
             return view(*args, **kwargs)
         unauthorized_exception = exception.WerkzeugException.Unauthorized
         unauthorized_exception.description = 'Login Required'
