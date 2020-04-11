@@ -44,8 +44,7 @@ def get_form_data_by_key(form: ImmutableMultiDict, key: str):
 def make_error_response(e: exception.WerkzeugException.HTTPException):
     """
     当发生错误时，产生响应数据，发送``HTPPException``的信息
-    :param e:
-    :return:
+    :return: 返回状态码为``e.code``的错误响应
     """
     res = make_response((
         json.dumps({
@@ -56,12 +55,32 @@ def make_error_response(e: exception.WerkzeugException.HTTPException):
 
 
 def login_required(view):
+    """
+    这个函数通常以装饰器的形式使用，用于限定被装饰的视图函数只能在用户登录后调用。
+    :param view: 被装饰的视图函数
+    :type view: function
+    :return: 如果用户已登录，则返回视图函数
+    :except: 如果用户未登录会抛出``Unauthorized``
+    """
+
     @wraps(view)
     def wrapped_view(*args, **kwargs):
-        if 'name' in session and 'school_id' in session and 'password' in session:
+        if 'name' in session \
+                and 'school_id' in session \
+                and 'password' in session \
+                and 'type' in session:
             return view(*args, **kwargs)
         unauthorized_exception = exception.WerkzeugException.Unauthorized
         unauthorized_exception.description = 'Login Required'
         raise unauthorized_exception
 
     return wrapped_view
+
+
+def jsonify(obj: object):
+    """
+    对``json.dumps``的简单封装，防止每次都忘记加上``ensure_ascii=False``
+    :param obj: 将被序列化的对象
+    :return: 序列化后的字符串
+    """
+    return json.dumps(obj, ensure_ascii=False)

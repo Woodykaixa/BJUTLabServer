@@ -2,11 +2,12 @@ from flask import session, g
 
 from ..exception import APIReinitializationError, ParameterException
 from ..utilities import Encryptor, SQLHandler
-import json
+from ..utilities.misc import jsonify
 
 
 class AuthAPI:
     __auth_instance = None
+    __change_password_proc = ['update_student_user']
 
     def __init__(self, logger, sql: SQLHandler):
         if AuthAPI.__auth_instance is not None:
@@ -44,17 +45,18 @@ class AuthAPI:
             session['school_id'] = school_id
             session['name'] = dataset[0][0]
             session['password'] = md5_pwd
-            return {
+            session['type'] = user_type
+            return jsonify({
                 'success': True,
                 'name': dataset[0][0]
-            }
+            })
         return {
             'success': False
         }
 
     def change_password(self, old: str, new: str):
         if Encryptor.md5(old) == session['password']:
-            proc_name = 'update_student_user'
+            proc_name = AuthAPI.__change_password_proc[session['type']]
             school_id = session['school_id']
             name = session['name']
             md5_new = Encryptor.md5(new)
@@ -70,6 +72,6 @@ class AuthAPI:
     def test_session(self):
         self._logger.info('hello, {}'.format(session['name']))
 
-        return json.dumps({
+        return jsonify({
             'msg': 'hello, {}'.format(session['name'])
-        }, ensure_ascii=False)
+        })

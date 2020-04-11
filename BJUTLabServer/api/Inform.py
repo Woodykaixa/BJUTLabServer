@@ -1,4 +1,4 @@
-import json
+from ..utilities.misc import jsonify
 
 from BJUTLabServer import exception
 
@@ -30,7 +30,7 @@ class InformAPI:
     def get_inform_brief(self, type_code: int, number: int, page_index: int, filter_str: str):
         try:
             api_get_inform_brief = self.__get_inform_brief_method_list[type_code]
-            return json.dumps(api_get_inform_brief(number, page_index, filter_str), ensure_ascii=False)
+            return jsonify(api_get_inform_brief(number, page_index, filter_str))
         except IndexError:
             raise exception.ParameterException(400, 'Unknown type: {}'.format(type_code))
 
@@ -66,8 +66,8 @@ class InformAPI:
                 raise exception.ParameterException(400, 'Invalid filter: {}'.format(e))
 
             param_final = param + tuple(filter_param)
-            self._logger.info('proc: ' +proc_name)
-            self._logger.info('param: '+str(param_final))
+            self._logger.info('proc: ' + proc_name)
+            self._logger.info('param: ' + str(param_final))
             dataset, count = self._sql.run_proc(proc_name, number, param_final)
 
         informs = self.__parse_dataset_for_get_inform_brief(dataset, 0)
@@ -123,7 +123,7 @@ class InformAPI:
                 else:
                     inform['principal_id'] = data[3]
                     inform['principal_name'] = data[4]
-                return json.dumps(inform, ensure_ascii=False)
+                return jsonify(inform)
             else:
                 raise exception.WerkzeugException.NotFound('Inform not found.')
         except IndexError:
