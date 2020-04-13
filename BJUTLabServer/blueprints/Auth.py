@@ -38,6 +38,12 @@ def change_password():
     return api.auth.change_password(old, new)
 
 
+@AuthBP.route('/logout', methods=['GET'])
+@login_required
+def logout():
+    return api.auth.logout()
+
+
 @AuthBP.route('/test_session', methods=['GET'])
 @login_required
 def test_session():

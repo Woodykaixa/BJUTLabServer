@@ -27,7 +27,7 @@ describe('测试Auth API', () => {
     it('测试api()生成的url是否正确', () => {
         expect(api('/')).to.eql('http://localhost:5000/');
     });
-    describe('#Login test', () => {
+    describe('登录测试', () => {
         it('学生登录', (done) => {
             postTo('/Auth/login', getLoginForm('18074104', 'ASDads64770', 0))
                 .then(res => res.json())
@@ -67,22 +67,18 @@ describe('测试Auth API', () => {
         }
         it('学生登录，学号错误', (done) => {
             postTo('/Auth/login', getLoginForm('180741016', 'ASDads64770', 0))
-                .catch(err => {
-                    done(err);
-                }).then(res => res.json()).then(json => {
+                .then(res => res.json()).then(json => {
                     console.log(json);
                     done();
-                    expect(res['success']).to.eql(false)
+                    expect(json['success']).to.eql(false)
                 });
         });
         it('学生登录，密码错误', (done) => {
             postTo('/Auth/login', getLoginForm('18074104', 'ASDads', 0))
-                .catch(err => {
-                    done(err);
-                }).then(res => res.json()).then(json => {
+                .then(res => res.json()).then(json => {
                     console.log(json);
                     done();
-                    expect(res['success']).to.eql(false)
+                    expect(json['success']).to.eql(false)
                 });
         });
         it('学生登录，缺少学号', (done) => {
@@ -127,5 +123,16 @@ describe('测试Auth API', () => {
                     done(err);
                 });
         });
+    });
+    describe('登出测试', () => {
+
+        it('登出', (done) => {
+            fetch(api('/Auth/logout'), { credentials: 'include' }).then(res => res.json())
+                .then(json => {
+                    done();
+                    expect(json['msg']).to.eql('bye, 初雨墨');
+                });
+        });
+
     });
 });

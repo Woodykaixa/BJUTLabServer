@@ -69,6 +69,14 @@ class AuthAPI:
             }
         raise ParameterException(400, 'Wrong password')
 
+    @staticmethod
+    def logout():
+        name = session['name']
+        session.clear()
+        return jsonify({
+            'msg': 'bye, {}'.format(name)
+        })
+
     def test_session(self):
         self._logger.info('hello, {}'.format(session['name']))
 
