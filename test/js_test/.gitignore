@@ -1,0 +1,4 @@
+/coverage
+/*.js
+/*.css
+!/test.*.js
