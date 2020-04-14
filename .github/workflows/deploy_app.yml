@@ -30,4 +30,4 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Reload App
       run: |
-        gunicorn "BJUTLabServer:app()"
+        gunicorn "BJUTLabServer:create_app()"
