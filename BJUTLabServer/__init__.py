@@ -22,6 +22,7 @@ def create_app():
     def update_self():
         app.logger.info(str(request.headers))
         app.logger.info(str(request.json))
+        return ""
 
     @app.errorhandler(ParameterException)
     def handle_parameter_exception(e):
