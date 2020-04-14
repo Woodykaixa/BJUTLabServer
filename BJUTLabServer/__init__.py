@@ -1,5 +1,5 @@
 def create_app():
-    from flask import Flask
+    from flask import Flask, request
     from flask_cors import CORS
     from .exception import ParameterException, WerkzeugException
     from .utilities import make_error_response
@@ -17,6 +17,11 @@ def create_app():
     def hi():
         return 'Welcome to use BJUTLab APIs.\n' \
                'Last modified: 2020-04-11 20:24:05'
+
+    @app.route('/RepoPushed', methods=['POST'])
+    def update_self():
+        app.logger.info(str(request.headers))
+        app.logger.info(str(request.json))
 
     @app.errorhandler(ParameterException)
     def handle_parameter_exception(e):
