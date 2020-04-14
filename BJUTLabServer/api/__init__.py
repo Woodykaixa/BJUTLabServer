@@ -12,7 +12,8 @@ class BJUTLabAPI:
         if BJUTLabAPI.__api_instance is not None:
             raise exception.APIReinitializationError('API')
         self._logger = Log.get_logger('BJUTLabServer.API')
-        DB_SETTING_PATH = Path(__file__).resolve().parent.parent.joinpath('utilities/db.json')
+        DB_SETTING_PATH = Path(__file__).resolve().parent \
+            .parent.parent.joinpath('db.json')
         self._sql = SQLHandler(DB_SETTING_PATH)
         self.inform = InformAPI.get_instance(self._logger, self._sql)
         self.auth = AuthAPI.get_instance(self._logger, self._sql)
