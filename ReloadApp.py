@@ -1,8 +1,8 @@
+import multiprocessing
 import os
+import re
 from signal import SIGKILL
 from time import sleep
-import re
-import multiprocessing
 
 
 def reboot():
@@ -19,4 +19,4 @@ p = multiprocessing.Process(target=reboot)
 p.start()
 sleep(20)
 p.terminate()
-os.kill(os.getpid(), SIGKILL)
+exit(0)
