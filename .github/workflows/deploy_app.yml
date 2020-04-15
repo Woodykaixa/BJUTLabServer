@@ -27,6 +27,10 @@ jobs:
         cp /srv/db.json /srv/actions-runner/_work/BJUTLabServer/BJUTLabServer
     - name: Reload App
       run: |
+        is_grep=$(ps -aux|grep gunicorn|awk 'NR==1 {print $11}')
+        if (($is_grep=='grep'))
+        then
         pid=$(ps -aux|grep gunicorn|awk 'NR==1 {print $2}')
-        kill -9 $pid
+        kill $pid
+        fi
         nohup gunicorn "BJUTLabServer:create_app()" > reboot.log
