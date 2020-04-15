@@ -25,6 +25,3 @@ jobs:
       run: |
         mkdir /srv/actions-runner/_work/BJUTLabServer/BJUTLabServer/log
         cp /srv/db.json /srv/actions-runner/_work/BJUTLabServer/BJUTLabServer
-    - name: Reload App
-      run: |
-        python3 /srv/actions-runner/_work/BJUTLabServer/BJUTLabServer/ReloadApp.py
