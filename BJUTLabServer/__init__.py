@@ -16,7 +16,7 @@ def create_app():
     @app.route('/')
     def hi():
         return 'Welcome to use BJUTLab APIs.\n' \
-               'Last modified: 2020-04-11 20:24:05'
+               'Last modified: 2020-04-14 12:27:35'
 
     @app.errorhandler(ParameterException)
     def handle_parameter_exception(e):
