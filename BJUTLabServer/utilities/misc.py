@@ -67,7 +67,7 @@ def login_required(view):
     @wraps(view)
     def wrapped_view(*args, **kwargs):
         if 'name' in session \
-                and 'school_id' in session \
+                and 'id' in session \
                 and 'password' in session \
                 and 'type' in session:
             return view(*args, **kwargs)

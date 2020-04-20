@@ -38,7 +38,7 @@ class AuthAPI:
         g.sid = school_id
         if code == 0:
             session.clear()
-            session['school_id'] = school_id
+            session['id'] = school_id
             session['name'] = dataset[0][0]
             session['password'] = md5_pwd
             session['type'] = user_type
