@@ -1,8 +1,15 @@
-from .. import exception
+"""
+api模块是项目中真正负责实现API的模块，每个class中的方法均对应了一个API,
+blueprints中的视图函数调用api模块的函数，返回api调用结果。因为参数在视图
+函数检查过参数了，所以这里的参数都是验证过的合法参数。
+"""
+
+from pathlib import Path
+
 from BJUTLabServer.utilities import SQLHandler, Log
 from .Auth import AuthAPI
 from .Inform import InformAPI
-from pathlib import Path
+from .. import exception
 
 
 class BJUTLabAPI:
