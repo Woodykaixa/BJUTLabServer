@@ -2,6 +2,7 @@ import json
 from functools import wraps
 
 from flask import make_response, session
+from datetime import datetime, timedelta
 from werkzeug.datastructures import ImmutableMultiDict
 
 from .. import exception
@@ -84,3 +85,47 @@ def jsonify(obj: object):
     :return: 序列化后的字符串
     """
     return json.dumps(obj, ensure_ascii=False)
+
+
+TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+
+
+def str_to_datetime(dt: str):
+    """
+    按照``TIME_FORMAT``将```dt``转换为``datetime``类型
+    :param dt:表示日期的字符串
+    :return: 如果转换成功则返回转换后的``datetime``对象，和``None``，否则
+             返回``None``和`一个异常
+    """
+    try:
+        d = datetime.strptime(dt, TIME_FORMAT)
+        return d, None
+    except ValueError or TypeError:
+        return None, exception.InvalidParameter(400, 'is not a datetime string')
+
+
+def timedelta_check(delta: timedelta):
+    """
+    检查``delta``是否在给定的区间内[0,5](分钟)
+    :return: 如果``delta``在区间内，返回``None``；否则返回``InvalidParameter``
+    """
+    if delta < timedelta(seconds=0):
+        return exception.InvalidParameter(400, 'Do you have a time machine?')
+    elif timedelta(minutes=5) < delta:
+        return exception.InvalidParameter(400, 'Date too late')
+    else:
+        return None
+
+
+def check_and_get_time_str(time_str: str, standard: datetime):
+    """
+    检查``time_str``表示的时间和``standard``的差是否在给定的区间内(5分钟)
+    :return: 返回由``time_str``转换而来的``datetime``对象
+    """
+    dt, e = str_to_datetime(time_str)
+    if e is not None:
+        raise e
+    e = timedelta_check(standard - dt)
+    if e is not None:
+        raise e
+    return dt
