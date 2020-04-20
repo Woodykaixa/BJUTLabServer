@@ -1,6 +1,7 @@
-from ..utilities.misc import jsonify
+from datetime import datetime
 
 from BJUTLabServer import exception
+from ..utilities.misc import jsonify
 
 
 class InformAPI:
@@ -9,6 +10,8 @@ class InformAPI:
     __get_inform_type_list = ['create', 'expire', 'principal']
     __get_inform_procedure_list = ['get_inform_temporary_by_id',
                                    'get_inform_long_term_by_id']
+    __create_inform_procedure_list = ['create_inform_temporary',
+                                      'create_inform_long_term']
 
     def __init__(self, logger, sql):
         if InformAPI.__inform_instance is not None:
@@ -128,3 +131,10 @@ class InformAPI:
                 raise exception.WerkzeugException.NotFound('Inform not found.')
         except IndexError:
             raise exception.ParameterException(400, 'Invalid type: {}'.format(type_code))
+
+    def create_inform(self, title: str, content: str, type_code: int, create: datetime,
+                      nullable_expire: datetime):
+        proc = InformAPI.__create_inform_procedure_list[type_code]
+        param = (title, content, create)
+
+        pass

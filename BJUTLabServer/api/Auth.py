@@ -22,8 +22,6 @@ class AuthAPI:
         return AuthAPI.__auth_instance
 
     def register(self, school_id: str, name: str, password: str, user_type: int):
-        if user_type != 0:
-            raise ParameterException(400, 'Unsupported user type: {}'.format(user_type))
         proc_name = 'create_student_user'
         md5_pwd = Encryptor.md5(password)
         dataset, code = self._sql.run_proc(proc_name, 1, (school_id, name, md5_pwd))
@@ -32,8 +30,6 @@ class AuthAPI:
         }
 
     def login(self, school_id: str, password: str, user_type: int):
-        if user_type != 0:
-            raise ParameterException(400, 'Unsupported user type: {}'.format(user_type))
         proc_name = 'get_student_user'
         md5_pwd = Encryptor.md5(password)
         dataset, code = self._sql.run_proc(proc_name, 1, (school_id, md5_pwd))

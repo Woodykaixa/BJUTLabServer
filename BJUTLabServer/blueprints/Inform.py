@@ -1,7 +1,11 @@
+from datetime import datetime
+
 from flask import Blueprint, request
 
-from BJUTLabServer.utilities import none_check
+from BJUTLabServer.utilities import none_check, get_form_data_by_key
 from ..api import BJUTLabAPI
+from ..exception import InvalidParameter
+from ..utilities.misc import check_and_get_time_str
 
 api = BJUTLabAPI.get_instance()
 
@@ -29,3 +33,26 @@ def get_inform():
     if check_result['hasNone']:
         raise check_result['exception']
     return api.inform.get_inform(type_code, inform_id)
+
+
+@InformBP.route('/inform', methods=['POST'])
+def create_inform():
+    form = request.form
+    title = get_form_data_by_key(form, 'title')
+    content = get_form_data_by_key(form, 'content')
+    type_code = get_form_data_by_key(form, 'type')
+    create = get_form_data_by_key(form, 'create')
+    expire_dt = None
+
+    if len(title) > 30:
+        raise InvalidParameter(400, 'title too long')
+    if len(content) > 200:
+        raise InvalidParameter(400, 'content too long')
+    if type_code not in ['0', '1']:
+        raise InvalidParameter(400, 'Unsupported type: {}'.format(type_code))
+    standard = datetime.now()
+    create_dt = check_and_get_time_str(create, standard)
+    if type_code == '0':
+        expire = get_form_data_by_key(form, 'expire')
+        expire_dt = check_and_get_time_str(expire, standard)
+    return api.inform.create_inform(title, content, int(type_code), create_dt, expire_dt)
