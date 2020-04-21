@@ -1,8 +1,8 @@
 const api = (route) => 'http://localhost:5000' + route;
 
-const getLoginForm = (school_id, password, type) => {
+const getLoginForm = (id, password, type) => {
     const form = new FormData();
-    form.append('school_id', school_id);
+    form.append('id', id);
     form.append('password', password);
     form.append('type', type);
     return form;
@@ -13,7 +13,7 @@ const getChangePwdForm = (old, New) => {
     form.append('old', old);
     form.append('new', New);
     return form;
-}
+};
 
 const postTo = async (route, form) => {
     return await fetch(api(route), {
@@ -30,9 +30,12 @@ describe('测试Auth API', () => {
     describe('登录测试', () => {
         it('学生登录', (done) => {
             postTo('/Auth/login', getLoginForm('18074104', 'ASDads64770', 0))
-                .then(res => res.json())
-                .then(json => {
+                .then(res => {
                     done();
+                    expect(res.status).to.eql(200);
+                    return res.json()
+                })
+                .then(json => {
                     expect(json['success']).to.eql(true);
                     expect(json['name']).to.eql('初雨墨');
                 }).catch(err => {
@@ -42,31 +45,53 @@ describe('测试Auth API', () => {
 
         it('教师登录', (done) => {
             postTo('/Auth/login', getLoginForm('18074104', 'ASDads64770', 1))
-                .then(res => res.json())
+                .then(res => {
+                    done();
+                    expect(res.status).to.eql(400);
+                    return res.json()
+                })
                 .then(json => {
                     console.log(json);
-                    done();
+                    expect(json['err']).to.eql('Invalid parameter: unsupported user type: 1');
                 }).catch(err => {
                     done(err);
-                    expect(err['err']).to.eql('Unsupported user type: 1');
                 });
         });
-        for (let typeCode = 2; typeCode < 5; typeCode++) {
+        it('实验室管理员登录', (done) => {
+            postTo('/Auth/login', getLoginForm('G18074104', 'ASDads64770', 2))
+                .then(res => {
+                    done();
+                    expect(res.status).to.eql(200)
+                    return res.json()
+                }).then(json => {
+                    expect(json['success']).to.eql(true);
+                    expect(json['name']).to.eql('开发者kaixa');
+                    expect(json['office']).to.eql('11号楼A314');
+                    expect(json['phone']).to.eql(null);
+                    expect(json['email']).to.eql('690750353@qq.com');
+                }).catch(err => {
+                    done(err);
+                });
+        });
+        for (let typeCode = 3; typeCode < 6; typeCode++) {
             it(`登录测试: type = ${typeCode}`, (done) => {
                 postTo('/Auth/login',
                     getLoginForm('What ever you fill', 'What ever you fill', typeCode))
-                    .then(res => res.json())
+                    .then(res => {
+                        done();
+                        expect(res.status).to.eql(400);
+                        return res.json()
+                    })
                     .then(json => {
                         console.log(json);
-                        done();
+                        expect(json['err']).to.eql('Invalid parameter: unsupported user type: ' + typeCode);
                     }).catch(err => {
                         done(err);
-                        expect(err['err']).to.eql('Unsupported user type: ' + typeCode);
                     })
             });
         }
         it('学生登录，学号错误', (done) => {
-            postTo('/Auth/login', getLoginForm('180741016', 'ASDads64770', 0))
+            postTo('/Auth/login', getLoginForm('18074101', 'ASDads64770', 0))
                 .then(res => res.json()).then(json => {
                     console.log(json);
                     done();
@@ -90,14 +115,15 @@ describe('测试Auth API', () => {
                 .then(json => {
                     console.log(json);
                     done();
-                    expect(json['err']).to.eql('Missing parameter: school_id');
+                    expect(json['err']).to.eql('Missing parameter: id');
                 }).catch(err => {
                     done(err);
+                    expect(1).to.eql(2);
                 });
         });
         it('学生登录，缺少密码', (done) => {
             const form = new FormData();
-            form.append('school_id', 'What ever you fill');
+            form.append('id', 'What ever you fill');
             form.append('type', 0);
             postTo('/Auth/login', form)
                 .then(res => res.json())
@@ -107,11 +133,12 @@ describe('测试Auth API', () => {
                     expect(json['err']).to.eql('Missing parameter: password');
                 }).catch(err => {
                     done(err);
+                    expect(1).to.eql(2);
                 });
         });
         it('学生登录，缺少登录类型', (done) => {
             const form = new FormData();
-            form.append('school_id', 'Fill anything you want');
+            form.append('id', 'Fill anything you want');
             form.append('password', 'What ever you fill');
             postTo('/Auth/login', form)
                 .then(res => res.json())
@@ -121,6 +148,7 @@ describe('测试Auth API', () => {
                     expect(json['err']).to.eql('Missing parameter: type');
                 }).catch(err => {
                     done(err);
+                    expect(1).to.eql(2);
                 });
         });
     });
@@ -135,4 +163,5 @@ describe('测试Auth API', () => {
         });
 
     });
-});
+})
+    ;
