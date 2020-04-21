@@ -29,17 +29,20 @@ def none_check(code: int, msg: str, *args):
     }
 
 
-def get_form_data_by_key(form: ImmutableMultiDict, key: str):
+def get_form_data_by_key(form: ImmutableMultiDict, key: str, nullable: bool = False):
     """
-    根据key，从表单中获取对应value，如果key不存在则会抛出一个
+     根据``key``，从表单中获取对应``value``，如果``key``不存在而且nullable为``False``则
+     抛出``ParameterException``
     :param form: http请求的表单参数
     :param key: 表单中的一个key
-    :return: ``key``对应的value, 即``form[key]``
+    :param nullable: key可能不存在
+    :return: ``key``对应的value, 即``form[key]``，或``None``
     """
-    try:
+    if key in form:
         return form[key]
-    except KeyError:
-        raise exception.ParameterException(400, 'Missing parameter: {}'.format(key))
+    elif nullable:
+        return None
+    raise exception.ParameterException(400, 'Missing parameter: {}'.format(key))
 
 
 def make_error_response(e: exception.WerkzeugException.HTTPException):

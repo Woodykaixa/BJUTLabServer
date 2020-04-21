@@ -8,6 +8,7 @@ from ..utilities.misc import jsonify
 class AuthAPI:
     __auth_instance = None
     __change_password_proc = ['update_student_user']
+    __login_proc = ['get_student_user', None, 'get_principal_by_info']
 
     def __init__(self, logger, sql: SQLHandler):
         if AuthAPI.__auth_instance is not None:
@@ -21,7 +22,7 @@ class AuthAPI:
             AuthAPI.__auth_instance = AuthAPI(logger, sql)
         return AuthAPI.__auth_instance
 
-    def register(self, school_id: str, name: str, password: str, user_type: int):
+    def register_user(self, school_id: str, name: str, password: str, user_type: int):
         proc_name = 'create_student_user'
         md5_pwd = Encryptor.md5(password)
         dataset, code = self._sql.run_proc(proc_name, 1, (school_id, name, md5_pwd))
@@ -29,8 +30,18 @@ class AuthAPI:
             'return code': code
         }
 
+    def register_principal(self, sid: str, name: str, password: str, office: str, phone: str, email: str):
+        proc = 'create_principal'
+        md5_pwd = Encryptor.md5(password)
+
+        param = (name, sid, md5_pwd, office, email, phone)
+        _, code = self._sql.run_proc(proc, 1, param)
+        return {
+            'return code': code
+        }
+
     def login(self, school_id: str, password: str, user_type: int):
-        proc_name = 'get_student_user'
+        proc_name = AuthAPI.__login_proc[user_type]
         md5_pwd = Encryptor.md5(password)
         dataset, code = self._sql.run_proc(proc_name, 1, (school_id, md5_pwd))
         self._logger.info(str(dataset))
@@ -42,10 +53,15 @@ class AuthAPI:
             session['name'] = dataset[0][0]
             session['password'] = md5_pwd
             session['type'] = user_type
-            return jsonify({
+            rv = {
                 'success': True,
                 'name': dataset[0][0]
-            })
+            }
+            if user_type == 2:
+                rv['office'] = dataset[0][1]
+                rv['phone'] = dataset[0][2]
+                rv['email'] = dataset[0][3]
+            return jsonify(rv)
         return {
             'success': False
         }
@@ -53,7 +69,7 @@ class AuthAPI:
     def change_password(self, old: str, new: str):
         if Encryptor.md5(old) == session['password']:
             proc_name = AuthAPI.__change_password_proc[session['type']]
-            school_id = session['school_id']
+            school_id = session['id']
             name = session['name']
             md5_new = Encryptor.md5(new)
             dataset, code = self._sql.run_proc(proc_name, 1, (school_id, name, md5_new))
