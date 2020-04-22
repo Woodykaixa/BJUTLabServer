@@ -104,7 +104,7 @@ def str_to_datetime(dt: str):
         d = datetime.strptime(dt, TIME_FORMAT)
         return d, None
     except ValueError or TypeError:
-        return None, exception.InvalidParameter(400, 'is not a datetime string')
+        return None, exception.InvalidParameter(400, 'does not match format %Y-%m-%d %H:%M:%S')
 
 
 def timedelta_check(delta: timedelta):
