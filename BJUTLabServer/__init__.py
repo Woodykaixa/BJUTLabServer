@@ -3,11 +3,11 @@ def create_app():
     from flask_cors import CORS
     from .exception import ParameterException, WerkzeugException
     from .utilities import make_error_response
-    from .blueprints import InformBP, AuthBP
+    from .blueprints import BPList
 
     app = Flask('BJUTLabServer')
-    app.register_blueprint(InformBP)
-    app.register_blueprint(AuthBP)
+    for bp in BPList:
+        app.register_blueprint(bp)
     CORS(app, supports_credentials=True)
     app.config.from_mapping(
         SECRET_KEY='afkJLSLjfljkKLS8Rsfj234LMNK'
@@ -16,7 +16,7 @@ def create_app():
     @app.route('/')
     def hi():
         return 'Welcome to use BJUTLab APIs.\n' \
-               'Last modified: 2020-04-21 22:48:35'
+               'Last modified: 2020-04-27 15:48:09'
 
     @app.errorhandler(ParameterException)
     def handle_parameter_exception(e):

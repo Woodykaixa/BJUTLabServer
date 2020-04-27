@@ -4,3 +4,6 @@ api模块的函数并返回API的调用结果
 """
 from .Inform import InformBP
 from .Auth import AuthBP
+from .Experiment import ExpBP
+
+BPList = [InformBP, AuthBP, ExpBP]

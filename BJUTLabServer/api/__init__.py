@@ -9,6 +9,7 @@ from pathlib import Path
 from BJUTLabServer.utilities import SQLHandler, Log
 from .Auth import AuthAPI
 from .Inform import InformAPI
+from .Experiment import ExpAPI
 from .. import exception
 
 
@@ -24,6 +25,7 @@ class BJUTLabAPI:
         self._sql = SQLHandler(DB_SETTING_PATH)
         self.inform = InformAPI.get_instance(self._logger, self._sql)
         self.auth = AuthAPI.get_instance(self._logger, self._sql)
+        self.exp = ExpAPI.get_instance(self._logger, self._sql)
 
     @staticmethod
     def get_instance():
