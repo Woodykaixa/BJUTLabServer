@@ -1,12 +1,3 @@
-const api = (route) => 'http://localhost:5000' + route;
-
-const getLoginForm = (id, password, type) => {
-    const form = new FormData();
-    form.append('id', id);
-    form.append('password', password);
-    form.append('type', type);
-    return form;
-};
 
 const getChangePwdForm = (old, New) => {
     const form = new FormData();
@@ -15,13 +6,6 @@ const getChangePwdForm = (old, New) => {
     return form;
 };
 
-const postTo = async (route, form) => {
-    return await fetch(api(route), {
-        method: 'POST',
-        body: form,
-        credentials: 'include'
-    });
-};
 
 describe('测试Auth API', () => {
     it('测试api()生成的url是否正确', () => {

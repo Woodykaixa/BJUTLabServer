@@ -1,7 +1,6 @@
 import json
-
+import threading
 import pymysql
-import pymysql.err as sql_error
 
 from .Log import Log
 
@@ -10,7 +9,7 @@ class SQLHandler:
     def __init__(self, conf_path: str):
         self._logger = Log.get_logger('BJUTLabServer.SQLHandler')
         self._logger.info('Read database settings from path: {}'.format(conf_path))
-
+        self.lock = threading.Lock()
         self._db_config = SQLHandler.read_config(conf_path)
         self._connection = None
         self.connect_database()
@@ -41,12 +40,12 @@ class SQLHandler:
         :return: 查询结果集
         """
         try:
-            cursor = self._connection.cursor()
+            cursor = self._connection.cursor(pymysql.cursors.Cursor)
             cursor.execute(sql)
             res = cursor.fetchmany(top_n)
             cursor.close()
             return res
-        except sql_error.OperationalError as oe:
+        except pymysql.OperationalError as oe:
             if oe.args[0] == 2006:
                 self._logger.info('数据库连接断开，重新连接。')
                 self.connect_database()
@@ -57,14 +56,19 @@ class SQLHandler:
         调用存储过程。返回结果集以及一个out参数。BJUTLab的存储过程均有且只有一个OUT参数。
         """
         try:
+            self.lock.acquire(True, 5)
+            self._logger.info('run_proc:: proc: {}'.format(proc_name))
+            self._logger.info(('run_proc:: param: {}'.format(param)))
             cursor = self._connection.cursor()
-            cursor.callproc(proc_name, param + (0,))
+            cursor.callproc(proc_name, param + (10,))
             res = cursor.fetchmany(top_n)
             cursor.execute('select @_' + proc_name + '_' + str(len(param)))
             out_param = cursor.fetchone()
+            cursor.connection.commit()
             cursor.close()
+            self.lock.release()
             return res, out_param[0]
-        except sql_error.OperationalError as oe:
+        except pymysql.OperationalError as oe:
             if oe.args[0] == 2006:
                 self._logger.info('数据库连接断开，重新连接。')
                 self.connect_database()

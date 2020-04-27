@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from flask import session
+
 from BJUTLabServer import exception
 from ..utilities.misc import jsonify
 
@@ -83,7 +85,7 @@ class InformAPI:
         if filter_str is None:
             dataset, count = self._sql.run_proc(proc_name, number, param + (None, None))
         else:
-            filter_pair = str(filter_str).split('=')
+            filter_pair = str(filter_str).split('->')
             filter_param = [0, None]
 
             try:
@@ -121,10 +123,10 @@ class InformAPI:
                 }
                 if type_code == 0:
                     inform['expire'] = str(data[3])
-                    inform['principal_id'] = data[4]
+                    inform['principal_sid'] = data[4]
                     inform['principal_name'] = data[5]
                 else:
-                    inform['principal_id'] = data[3]
+                    inform['principal_sid'] = data[3]
                     inform['principal_name'] = data[4]
                 return jsonify(inform)
             else:
@@ -134,7 +136,14 @@ class InformAPI:
 
     def create_inform(self, title: str, content: str, type_code: int, create: datetime,
                       nullable_expire: datetime):
+        principal = session['id']
         proc = InformAPI.__create_inform_procedure_list[type_code]
-        param = (title, content, create)
-
-        pass
+        param = [title, content, create, principal]
+        if type_code == 0:
+            param.insert(2, nullable_expire)
+        self._logger.info('create_inform::param: {}'.format(param))
+        d, code = self._sql.run_proc(proc, 1, tuple(param))
+        self._logger.info('create_inform::result: {} {}'.format(d, code))
+        return jsonify({
+            'return code': code
+        })

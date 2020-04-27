@@ -5,7 +5,7 @@ from flask import Blueprint, request
 from BJUTLabServer.utilities import none_check, get_form_data_by_key
 from ..api import BJUTLabAPI
 from ..exception import InvalidParameter
-from ..utilities.misc import check_and_get_time_str
+from ..utilities.misc import check_and_get_time_str, login_required
 
 api = BJUTLabAPI.get_instance()
 
@@ -36,6 +36,7 @@ def get_inform():
 
 
 @InformBP.route('/inform', methods=['POST'])
+@login_required
 def create_inform():
     form = request.form
     title = get_form_data_by_key(form, 'title')
@@ -54,5 +55,5 @@ def create_inform():
     create_dt = check_and_get_time_str(create, standard)
     if type_code == '0':
         expire = get_form_data_by_key(form, 'expire')
-        expire_dt = check_and_get_time_str(expire, standard)
+        expire_dt = check_and_get_time_str(expire, create_dt, True)
     return api.inform.create_inform(title, content, int(type_code), create_dt, expire_dt)

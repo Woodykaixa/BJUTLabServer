@@ -107,12 +107,12 @@ def str_to_datetime(dt: str):
         return None, exception.InvalidParameter(400, 'does not match format %Y-%m-%d %H:%M:%S')
 
 
-def timedelta_check(delta: timedelta):
+def timedelta_check(delta: timedelta, minus_only: bool = False):
     """
     检查``delta``是否在给定的区间内[0,5](分钟)
     :return: 如果``delta``在区间内，返回``None``；否则返回``InvalidParameter``
     """
-    if delta < timedelta(seconds=0):
+    if not minus_only and delta < timedelta(seconds=-1):
         return exception.InvalidParameter(400, 'Do you have a time machine?')
     elif timedelta(minutes=5) < delta:
         return exception.InvalidParameter(400, 'Date too late')
@@ -120,15 +120,18 @@ def timedelta_check(delta: timedelta):
         return None
 
 
-def check_and_get_time_str(time_str: str, standard: datetime):
+def check_and_get_time_str(time_str: str, standard: datetime, minus_only: bool = False):
     """
     检查``time_str``表示的时间和``standard``的差是否在给定的区间内(5分钟)
+    :param time_str
+    :param standard
+    :param minus_only 只检查``time_str``与``standard``的差为负
     :return: 返回由``time_str``转换而来的``datetime``对象
     """
     dt, e = str_to_datetime(time_str)
     if e is not None:
         raise e
-    e = timedelta_check(standard - dt)
+    e = timedelta_check(standard - dt, minus_only)
     if e is not None:
         raise e
     return dt
