@@ -2,7 +2,7 @@ import json
 from functools import wraps
 
 from flask import make_response, session
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from werkzeug.datastructures import ImmutableMultiDict
 
 from .. import exception
@@ -29,7 +29,7 @@ def none_check(code: int, msg: str, *args):
     }
 
 
-def get_form_data_by_key(form: ImmutableMultiDict, key: str, nullable: bool = False):
+def get_form_data_by_key(form: ImmutableMultiDict, key: str, nullable: bool = False) -> str or None:
     """
      根据``key``，从表单中获取对应``value``，如果``key``不存在而且nullable为``False``则
      抛出``ParameterException``
@@ -120,7 +120,7 @@ def timedelta_check(delta: timedelta, minus_only: bool = False):
         return None
 
 
-def check_and_get_time_str(time_str: str, standard: datetime, minus_only: bool = False):
+def check_and_get_time_str(time_str: str, standard: datetime, minus_only: bool = False) -> datetime:
     """
     检查``time_str``表示的时间和``standard``的差是否在给定的区间内(5分钟)
     :param time_str
@@ -135,3 +135,10 @@ def check_and_get_time_str(time_str: str, standard: datetime, minus_only: bool =
     if e is not None:
         raise e
     return dt
+
+
+def parse_date_str(param_name: str, date_str: str) -> date:
+    try:
+        return date.fromisoformat(date_str)
+    except ValueError:
+        raise exception.FormatError(param_name)
