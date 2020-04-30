@@ -62,4 +62,5 @@ def create_order():
         raise InvalidParameter(400, 'usage is too long')
     if type_code not in ACCEPTABLE_ORDER_TYPE:
         raise UnsupportedTypeError(type_code)
-    return api.exp.create_order()
+    sid = session['id']
+    return api.exp.create_order(sid, commit_dt, use_d, time_range, lab_id, usage)
