@@ -40,15 +40,22 @@ class MissingParameter(ParameterException):
         MissingParameter.description = 'Missing parameter: {}'.format(desc)
 
 
-def FormatError(param_name: str) -> InvalidParameter:
+def FormatError(param_name: str, format_str: str = None) -> InvalidParameter:
     """
     这是一个看起来像异常类的函数，你完全可以按照抛出异常的方式使用它。
     `
         raise FormatError('id')
     `
     """
-    return InvalidParameter(400, '{} has wrong format'.format(param_name))
+    desc = '{} has wrong format'.format(param_name)
+    if format_str is not None:
+        desc += '({})'.format(format_str)
+    return InvalidParameter(400, desc)
 
 
-def UnsupportedTypeError(type_code: int) -> InvalidParameter:
+def UnsupportedTypeError(type_code: int or str) -> InvalidParameter:
     return InvalidParameter(400, 'unsupported type: {}'.format(type_code))
+
+
+def DateError(param_name: str, bound: list) -> InvalidParameter:
+    return InvalidParameter(400, '{} is out of range({} seconds)'.format(param_name, bound))

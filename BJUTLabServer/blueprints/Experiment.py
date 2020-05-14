@@ -5,17 +5,15 @@ from flask import Blueprint, request, session
 from ..api import BJUTLabAPI
 from ..exception import (
     InvalidParameter,
-    MissingParameter,
-    FormatError,
-    UnsupportedTypeError
+    MissingParameter
 )
+from ..utilities.Validator import Validator
 from ..utilities.misc import (
     login_required,
-    check_and_get_time_str,
-    get_form_data_by_key,
-    parse_date_str
+    get_and_validate_param,
+    parse_date_str,
+    TIME_FORMAT
 )
-import re
 
 ExpBP = Blueprint('Experiment', __name__, url_prefix='/Experiment')
 api = BJUTLabAPI.get_instance()
@@ -45,22 +43,17 @@ def get_order():
 @login_required
 def create_order():
     form = request.form
-    commit = get_form_data_by_key(form, 'commit')
-    use = get_form_data_by_key(form, 'use')
-    time_range = get_form_data_by_key(form, 'time_range')
-    lab_id = get_form_data_by_key(form, 'lab_id')
-    usage = get_form_data_by_key(form, 'usage')
-    type_code = get_form_data_by_key(form, 'type')
+    commit = get_and_validate_param(form, 'commit', Validator.datetime_in_range,
+                                    (TIME_FORMAT, datetime.now(), (0, 5 * 60)))
+    use = get_and_validate_param(form, 'use')
+    time_range = get_and_validate_param(form, 'time_range', Validator.string_format,
+                                        (r'^\d{1,2}:\d{2}~\d{1,2}:\d{2}$',))
+    lab_id = get_and_validate_param(form, 'lab_id', Validator.isdigit)
+    usage = get_and_validate_param(form, 'usage', Validator.string_length, ((None, 200),))
+    type_code = get_and_validate_param(form, 'type',
+                                       Validator.acceptable_types, (ACCEPTABLE_ORDER_TYPE,))
 
-    commit_dt = check_and_get_time_str(commit, datetime.now())
+    commit_dt = datetime.strptime(commit, TIME_FORMAT)
     use_d = parse_date_str('use', use)
-    if not re.match(r'^\d{1,2}:\d{2}~\d{1,2}:\d{2}$', time_range):
-        raise FormatError('time_range')
-    if not str(lab_id).isdigit():
-        raise InvalidParameter(400, 'lab_id should be a number')
-    if len(usage) > 200:
-        raise InvalidParameter(400, 'usage is too long')
-    if type_code not in ACCEPTABLE_ORDER_TYPE:
-        raise UnsupportedTypeError(type_code)
     sid = session['id']
-    return api.exp.create_order(sid, commit_dt, use_d, time_range, lab_id, usage)
+    return api.exp.create_order(sid, commit_dt, use_d, time_range, lab_id, usage, int(type_code))

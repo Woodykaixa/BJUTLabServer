@@ -1,11 +1,14 @@
 import json
+import typing
+from datetime import datetime, timedelta, date
 from functools import wraps
 
 from flask import make_response, session
-from datetime import datetime, timedelta, date
 from werkzeug.datastructures import ImmutableMultiDict
 
 from .. import exception
+
+TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
 
 def none_check(code: int, msg: str, *args):
@@ -29,20 +32,31 @@ def none_check(code: int, msg: str, *args):
     }
 
 
-def get_form_data_by_key(form: ImmutableMultiDict, key: str, nullable: bool = False) -> str or None:
+def get_and_validate_param(form: ImmutableMultiDict, key: str,
+                           validator: typing.Callable = None, v_param: tuple = None,
+                           nullable: bool = False) -> str or None:
     """
-     根据``key``，从表单中获取对应``value``，如果``key``不存在而且nullable为``False``则
-     抛出``ParameterException``
-    :param form: http请求的表单参数
-    :param key: 表单中的一个key
-    :param nullable: key可能不存在
-    :return: ``key``对应的value, 即``form[key]``，或``None``
+    从``form``中获取参数，并验证参数是否合法。只有合法的参数会被返回。不合法的参数会抛出异常。
+    :param form: 存放参数的字典
+    :param key: 待获取参数的键
+    :param validator: 验证参数是否合法的函数，参数为``key``,``value``,``v_param``。如果为None
+                      则认为参数合法
+    :param v_param: 传给``validator``的额外参数，可以为None，
+    :param nullable: ``value``可以为None，此时会直接返回None.
+    :return:
     """
-    if key in form:
-        return form[key]
-    elif nullable:
-        return None
-    raise exception.ParameterException(400, 'Missing parameter: {}'.format(key))
+    value = form[key] if key in form else None
+    if value is None:
+        if nullable:
+            return value
+        raise exception.MissingParameter(400, key)
+    if validator is None:
+        return value
+    validator_param = (key, value,) + v_param if v_param else (key, value,)
+    valid, e = validator(validator_param)
+    if valid:
+        return value
+    raise e
 
 
 def make_error_response(e: exception.WerkzeugException.HTTPException):
@@ -88,53 +102,6 @@ def jsonify(obj: object):
     :return: 序列化后的字符串
     """
     return json.dumps(obj, ensure_ascii=False)
-
-
-TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
-
-
-def str_to_datetime(dt: str):
-    """
-    按照``TIME_FORMAT``将```dt``转换为``datetime``类型
-    :param dt:表示日期的字符串
-    :return: 如果转换成功则返回转换后的``datetime``对象，和``None``，否则
-             返回``None``和`一个异常
-    """
-    try:
-        d = datetime.strptime(dt, TIME_FORMAT)
-        return d, None
-    except ValueError or TypeError:
-        return None, exception.InvalidParameter(400, 'does not match format %Y-%m-%d %H:%M:%S')
-
-
-def timedelta_check(delta: timedelta, minus_only: bool = False):
-    """
-    检查``delta``是否在给定的区间内[0,5](分钟)
-    :return: 如果``delta``在区间内，返回``None``；否则返回``InvalidParameter``
-    """
-    if not minus_only and delta < timedelta(seconds=-1):
-        return exception.InvalidParameter(400, 'Do you have a time machine?')
-    elif timedelta(minutes=5) < delta:
-        return exception.InvalidParameter(400, 'Date too late')
-    else:
-        return None
-
-
-def check_and_get_time_str(time_str: str, standard: datetime, minus_only: bool = False) -> datetime:
-    """
-    检查``time_str``表示的时间和``standard``的差是否在给定的区间内(5分钟)
-    :param time_str
-    :param standard
-    :param minus_only 只检查``time_str``与``standard``的差为负
-    :return: 返回由``time_str``转换而来的``datetime``对象
-    """
-    dt, e = str_to_datetime(time_str)
-    if e is not None:
-        raise e
-    e = timedelta_check(standard - dt, minus_only)
-    if e is not None:
-        raise e
-    return dt
 
 
 def parse_date_str(param_name: str, date_str: str) -> date:

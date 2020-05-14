@@ -37,7 +37,7 @@ class ExpAPI:
         return jsonify(order_list)
 
     def create_order(self, sid: str, commit_dt: datetime, use_d: date,
-                     time_range: str, lab_id: int, usage: str):
+                     time_range: str, lab_id: int, usage: str, type_code: int):
         proc_name = 'create_student_order_record'
         param = (sid, commit_dt, use_d, time_range, lab_id, usage)
         _, code = self._sql.run_proc(proc_name, 1, param)

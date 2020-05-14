@@ -2,14 +2,15 @@ from datetime import datetime
 
 from flask import Blueprint, request
 
-from BJUTLabServer.utilities import none_check, get_form_data_by_key
+from BJUTLabServer.utilities import none_check, get_and_validate_param
 from ..api import BJUTLabAPI
-from ..exception import InvalidParameter
-from ..utilities.misc import check_and_get_time_str, login_required
+from ..utilities.Validator import Validator
+from ..utilities.misc import login_required, TIME_FORMAT
 
 api = BJUTLabAPI.get_instance()
 
 InformBP = Blueprint('Inform', __name__, url_prefix='/Inform')
+ACCEPTABLE_INFORM_TYPE = ['0', '1']
 
 
 @InformBP.route('/inform_brief', methods=['GET'])
@@ -39,21 +40,17 @@ def get_inform():
 @login_required
 def create_inform():
     form = request.form
-    title = get_form_data_by_key(form, 'title')
-    content = get_form_data_by_key(form, 'content')
-    type_code = get_form_data_by_key(form, 'type')
-    create = get_form_data_by_key(form, 'create')
-    expire_dt = None
-
-    if len(title) > 30:
-        raise InvalidParameter(400, 'title too long')
-    if len(content) > 200:
-        raise InvalidParameter(400, 'content too long')
-    if type_code not in ['0', '1']:
-        raise InvalidParameter(400, 'Unsupported type: {}'.format(type_code))
     standard = datetime.now()
-    create_dt = check_and_get_time_str(create, standard)
-    if type_code == '0':
-        expire = get_form_data_by_key(form, 'expire')
-        expire_dt = check_and_get_time_str(expire, create_dt, True)
+    title = get_and_validate_param(form, 'title', Validator.string_length, ((1, 30),))
+    content = get_and_validate_param(form, 'content', Validator.string_length, ((1, 200),))
+    type_code = get_and_validate_param(form, 'type', Validator.acceptable_types,
+                                       (ACCEPTABLE_INFORM_TYPE,))
+    create = get_and_validate_param(form, 'create', Validator.datetime_in_range,
+                                    (TIME_FORMAT, standard, (0, 5 * 60)))
+    create_dt = datetime.strptime(create, TIME_FORMAT)
+    expire = get_and_validate_param(form, 'expire', Validator.datetime_in_range,
+                                    (TIME_FORMAT, create_dt, (0, None)), True)
+    expire_dt = None
+    if type_code == '0' and expire is not None:
+        expire_dt = datetime.strptime(expire, TIME_FORMAT)
     return api.inform.create_inform(title, content, int(type_code), create_dt, expire_dt)

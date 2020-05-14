@@ -1,10 +1,12 @@
+import re
+
 from flask import Blueprint, request
 
 from ..api import BJUTLabAPI
-from ..utilities import Log, get_form_data_by_key
-from ..utilities.misc import login_required
 from ..exception import InvalidParameter
-import re
+from ..utilities import Log, get_and_validate_param
+from ..utilities.Validator import Validator
+from ..utilities.misc import login_required
 
 AuthBP = Blueprint('Auth', __name__, url_prefix='/Auth')
 
@@ -16,15 +18,13 @@ ACCEPTABLE_USER_TYPE = ['0', '2']
 @AuthBP.route('/register/user', methods=['POST'])
 def register_user():
     form = request.form
-    school_id = get_form_data_by_key(form, 'id')
-    name = get_form_data_by_key(form, 'name')
-    password = get_form_data_by_key(form, 'password')
-    user_type = get_form_data_by_key(form, 'type')
+    school_id = get_and_validate_param(form, 'id', Validator.string_format,
+                                       (Validator.school_id_format,))
+    name = get_and_validate_param(form, 'name', Validator.string_length, ((1, 10),))
+    password = get_and_validate_param(form, 'password')
+    user_type = get_and_validate_param(form, 'type', Validator.acceptable_types,
+                                       (ACCEPTABLE_USER_TYPE,))
 
-    if len(name) > 10:
-        raise InvalidParameter(400, 'name too long')
-    if user_type not in ACCEPTABLE_USER_TYPE:
-        raise InvalidParameter(400, 'unsupported user type: {}'.format(user_type))
     if (user_type == '0' and not re.match(r'\d{8}', school_id)) or \
             (user_type != '0' and not re.match(r'G\d{8}', school_id)):
         raise InvalidParameter(400, 'id has wrong format.')
@@ -35,23 +35,14 @@ def register_user():
 @AuthBP.route('/register/principal', methods=['POST'])
 def register_principal():
     form = request.form
-    school_id = get_form_data_by_key(form, 'id')
-    name = get_form_data_by_key(form, 'name')
-    password = get_form_data_by_key(form, 'password')
-    office = get_form_data_by_key(form, 'office')
-    phone = get_form_data_by_key(form, 'phone', True)
-    email = get_form_data_by_key(form, 'email', True)
-
-    if not re.match(r'G\d{8}', school_id):
-        raise InvalidParameter(400, 'id has wrong format.')
-    if len(name) > 10:
-        raise InvalidParameter(400, 'name too long')
-    if len(office) > 15:
-        raise InvalidParameter(400, 'office too long')
-    if not re.match(r'\d{11}', phone):
-        raise InvalidParameter(400, 'phone')
-    if not re.match(r'^[0-9a-zA-Z]+@([0-9a-zA-Z]+\.)+[0-9a-zA-Z]{2,6}$', email):
-        raise InvalidParameter(400, 'email format error')
+    school_id = get_and_validate_param(form, 'id', Validator.string_format,
+                                       (r'^G\d{8}$',))
+    name = get_and_validate_param(form, 'name', Validator.string_length, ((1, 10),))
+    password = get_and_validate_param(form, 'password')
+    office = get_and_validate_param(form, 'office', Validator.string_length, ((1, 15),))
+    phone = get_and_validate_param(form, 'phone', Validator.string_length, ((11, 11),))
+    email = get_and_validate_param(form, 'email', Validator.string_format,
+                                   (r'^[0-9a-zA-Z]+@([0-9a-zA-Z]+\.)+[0-9a-zA-Z]{2,6}$',))
 
     return api.auth.register_principal(school_id, name, password, office, phone, email)
 
@@ -59,14 +50,15 @@ def register_principal():
 @AuthBP.route('/login', methods=['POST'])
 def login():
     form = request.form
-    school_id = get_form_data_by_key(form, 'id')
-    password = get_form_data_by_key(form, 'password')
-    user_type = get_form_data_by_key(form, 'type')
-    if user_type not in ACCEPTABLE_USER_TYPE:
-        raise InvalidParameter(400, 'unsupported user type: {}'.format(user_type))
+    school_id = get_and_validate_param(form, 'id', Validator.string_format,
+                                       (Validator.school_id_format,))
+    password = get_and_validate_param(form, 'password')
+    user_type = get_and_validate_param(form, 'type', Validator.acceptable_types,
+                                       (ACCEPTABLE_USER_TYPE,))
+
     if (user_type == '0' and not re.match(r'^\d{8}$', school_id)) or \
             (user_type != '0' and not re.match(r'^G\d{8}$', school_id)):
-        raise InvalidParameter(400, 'id has wrong format.')
+        raise InvalidParameter(400, 'id has wrong format.')  # FIXME: 为Validator.string_format提供多个匹配模式
 
     return api.auth.login(school_id, password, int(user_type))
 
@@ -75,8 +67,8 @@ def login():
 @login_required
 def change_password():
     form = request.form
-    old = get_form_data_by_key(form, 'old')
-    new = get_form_data_by_key(form, 'new')
+    old = get_and_validate_param(form, 'old')
+    new = get_and_validate_param(form, 'new')
     return api.auth.change_password(old, new)
 
 

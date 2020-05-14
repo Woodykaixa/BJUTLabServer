@@ -36,7 +36,7 @@ describe('测试Auth API', () => {
                 })
                 .then(json => {
                     console.log(json);
-                    expect(json['err']).to.eql('Invalid parameter: unsupported user type: 1');
+                    expect(json['err']).to.eql('Invalid parameter: unsupported type: 1');
                 }).catch(err => {
                     done(err);
                 });
@@ -60,7 +60,7 @@ describe('测试Auth API', () => {
         for (let typeCode = 3; typeCode < 6; typeCode++) {
             it(`登录测试: type = ${typeCode}`, (done) => {
                 postTo('/Auth/login',
-                    getLoginForm('What ever you fill', 'What ever you fill', typeCode))
+                    getLoginForm('18074104', 'ASDads64770', typeCode))
                     .then(res => {
                         done();
                         expect(res.status).to.eql(400);
@@ -68,7 +68,7 @@ describe('测试Auth API', () => {
                     })
                     .then(json => {
                         console.log(json);
-                        expect(json['err']).to.eql('Invalid parameter: unsupported user type: ' + typeCode);
+                        expect(json['err']).to.eql('Invalid parameter: unsupported type: ' + typeCode);
                     }).catch(err => {
                         done(err);
                     })
@@ -107,7 +107,7 @@ describe('测试Auth API', () => {
         });
         it('学生登录，缺少密码', (done) => {
             const form = new FormData();
-            form.append('id', 'What ever you fill');
+            form.append('id', '18074104');
             form.append('type', 0);
             postTo('/Auth/login', form)
                 .then(res => res.json())
@@ -122,7 +122,7 @@ describe('测试Auth API', () => {
         });
         it('学生登录，缺少登录类型', (done) => {
             const form = new FormData();
-            form.append('id', 'Fill anything you want');
+            form.append('id', '18074104');
             form.append('password', 'What ever you fill');
             postTo('/Auth/login', form)
                 .then(res => res.json())
