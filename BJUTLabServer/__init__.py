@@ -1,9 +1,15 @@
+STARTUP_TIME = None
+
+
 def create_app():
-    from flask import Flask
+    from flask import Flask, render_template
     from flask_cors import CORS
     from .exception import ParameterException, WerkzeugException
     from .utilities import make_error_response
     from .blueprints import BPList
+    from datetime import datetime
+
+    STARTUP_TIME = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     app = Flask('BJUTLabServer')
     for bp in BPList:
@@ -15,8 +21,7 @@ def create_app():
 
     @app.route('/')
     def hi():
-        return 'Welcome to use BJUTLab APIs.\n' \
-               'Last modified: 2020-04-30 21:57:30'
+        return render_template('index.html', time=STARTUP_TIME)
 
     @app.errorhandler(ParameterException)
     def handle_parameter_exception(e):
