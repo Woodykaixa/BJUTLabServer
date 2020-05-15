@@ -32,9 +32,9 @@ def none_check(code: int, msg: str, *args):
     }
 
 
-def get_and_validate_param(form: ImmutableMultiDict, key: str,
-                           validator: typing.Callable = None, v_param: tuple = None,
-                           nullable: bool = False) -> str or None:
+def post_validate_param(form: ImmutableMultiDict, key: str,
+                        validator: typing.Callable = None, v_param: tuple = None,
+                        nullable: bool = False) -> str or None:
     """
     从``form``中获取参数，并验证参数是否合法。只有合法的参数会被返回。不合法的参数会抛出异常。
     :param form: 存放参数的字典

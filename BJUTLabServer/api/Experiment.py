@@ -1,6 +1,9 @@
-from ..exception import APIReinitializationError
 from datetime import date, datetime
-from ..utilities.misc import jsonify
+
+from ..exception import APIReinitializationError
+from ..utilities import (
+    jsonify
+)
 
 
 class ExpAPI:

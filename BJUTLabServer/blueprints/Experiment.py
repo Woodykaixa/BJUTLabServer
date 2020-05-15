@@ -7,12 +7,12 @@ from ..exception import (
     InvalidParameter,
     MissingParameter
 )
-from ..utilities.Validator import Validator
-from ..utilities.misc import (
+from ..utilities import (
     login_required,
-    get_and_validate_param,
+    post_validate_param,
     parse_date_str,
-    TIME_FORMAT
+    TIME_FORMAT,
+    Validator
 )
 
 ExpBP = Blueprint('Experiment', __name__, url_prefix='/Experiment')
@@ -43,15 +43,15 @@ def get_order():
 @login_required
 def create_order():
     form = request.form
-    commit = get_and_validate_param(form, 'commit', Validator.datetime_in_range,
-                                    (TIME_FORMAT, datetime.now(), (0, 5 * 60)))
-    use = get_and_validate_param(form, 'use')
-    time_range = get_and_validate_param(form, 'time_range', Validator.string_format,
-                                        (r'^\d{1,2}:\d{2}~\d{1,2}:\d{2}$',))
-    lab_id = get_and_validate_param(form, 'lab_id', Validator.isdigit)
-    usage = get_and_validate_param(form, 'usage', Validator.string_length, ((None, 200),))
-    type_code = get_and_validate_param(form, 'type',
-                                       Validator.acceptable_types, (ACCEPTABLE_ORDER_TYPE,))
+    commit = post_validate_param(form, 'commit', Validator.datetime_in_range,
+                                 (TIME_FORMAT, datetime.now(), (0, 5 * 60)))
+    use = post_validate_param(form, 'use')
+    time_range = post_validate_param(form, 'time_range', Validator.string_format,
+                                     (r'^\d{1,2}:\d{2}~\d{1,2}:\d{2}$',))
+    lab_id = post_validate_param(form, 'lab_id', Validator.isdigit)
+    usage = post_validate_param(form, 'usage', Validator.string_length, ((None, 200),))
+    type_code = post_validate_param(form, 'type',
+                                    Validator.acceptable_types, (ACCEPTABLE_ORDER_TYPE,))
 
     commit_dt = datetime.strptime(commit, TIME_FORMAT)
     use_d = parse_date_str('use', use)

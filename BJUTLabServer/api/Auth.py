@@ -1,8 +1,11 @@
 from flask import session, g
 
 from ..exception import APIReinitializationError, ParameterException
-from ..utilities import Encryptor, SQLHandler
-from ..utilities.misc import jsonify
+from ..utilities import (
+    Encryptor,
+    SQLHandler,
+    jsonify
+)
 
 
 class AuthAPI:

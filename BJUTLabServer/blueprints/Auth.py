@@ -4,9 +4,12 @@ from flask import Blueprint, request
 
 from ..api import BJUTLabAPI
 from ..exception import InvalidParameter
-from ..utilities import Log, get_and_validate_param
-from ..utilities.Validator import Validator
-from ..utilities.misc import login_required
+from ..utilities import (
+    Log,
+    post_validate_param,
+    Validator,
+    login_required
+)
 
 AuthBP = Blueprint('Auth', __name__, url_prefix='/Auth')
 
@@ -18,12 +21,12 @@ ACCEPTABLE_USER_TYPE = ['0', '2']
 @AuthBP.route('/register/user', methods=['POST'])
 def register_user():
     form = request.form
-    school_id = get_and_validate_param(form, 'id', Validator.string_format,
-                                       (Validator.school_id_format,))
-    name = get_and_validate_param(form, 'name', Validator.string_length, ((1, 10),))
-    password = get_and_validate_param(form, 'password')
-    user_type = get_and_validate_param(form, 'type', Validator.acceptable_types,
-                                       (ACCEPTABLE_USER_TYPE,))
+    school_id = post_validate_param(form, 'id', Validator.string_format,
+                                    (Validator.school_id_format,))
+    name = post_validate_param(form, 'name', Validator.string_length, ((1, 10),))
+    password = post_validate_param(form, 'password')
+    user_type = post_validate_param(form, 'type', Validator.acceptable_types,
+                                    (ACCEPTABLE_USER_TYPE,))
 
     if (user_type == '0' and not re.match(r'\d{8}', school_id)) or \
             (user_type != '0' and not re.match(r'G\d{8}', school_id)):
@@ -35,14 +38,14 @@ def register_user():
 @AuthBP.route('/register/principal', methods=['POST'])
 def register_principal():
     form = request.form
-    school_id = get_and_validate_param(form, 'id', Validator.string_format,
-                                       (r'^G\d{8}$',))
-    name = get_and_validate_param(form, 'name', Validator.string_length, ((1, 10),))
-    password = get_and_validate_param(form, 'password')
-    office = get_and_validate_param(form, 'office', Validator.string_length, ((1, 15),))
-    phone = get_and_validate_param(form, 'phone', Validator.string_length, ((11, 11),))
-    email = get_and_validate_param(form, 'email', Validator.string_format,
-                                   (r'^[0-9a-zA-Z]+@([0-9a-zA-Z]+\.)+[0-9a-zA-Z]{2,6}$',))
+    school_id = post_validate_param(form, 'id', Validator.string_format,
+                                    (r'^G\d{8}$',))
+    name = post_validate_param(form, 'name', Validator.string_length, ((1, 10),))
+    password = post_validate_param(form, 'password')
+    office = post_validate_param(form, 'office', Validator.string_length, ((1, 15),))
+    phone = post_validate_param(form, 'phone', Validator.string_length, ((11, 11),))
+    email = post_validate_param(form, 'email', Validator.string_format,
+                                (r'^[0-9a-zA-Z]+@([0-9a-zA-Z]+\.)+[0-9a-zA-Z]{2,6}$',))
 
     return api.auth.register_principal(school_id, name, password, office, phone, email)
 
@@ -50,11 +53,11 @@ def register_principal():
 @AuthBP.route('/login', methods=['POST'])
 def login():
     form = request.form
-    school_id = get_and_validate_param(form, 'id', Validator.string_format,
-                                       (Validator.school_id_format,))
-    password = get_and_validate_param(form, 'password')
-    user_type = get_and_validate_param(form, 'type', Validator.acceptable_types,
-                                       (ACCEPTABLE_USER_TYPE,))
+    school_id = post_validate_param(form, 'id', Validator.string_format,
+                                    (Validator.school_id_format,))
+    password = post_validate_param(form, 'password')
+    user_type = post_validate_param(form, 'type', Validator.acceptable_types,
+                                    (ACCEPTABLE_USER_TYPE,))
 
     if (user_type == '0' and not re.match(r'^\d{8}$', school_id)) or \
             (user_type != '0' and not re.match(r'^G\d{8}$', school_id)):
@@ -67,8 +70,8 @@ def login():
 @login_required
 def change_password():
     form = request.form
-    old = get_and_validate_param(form, 'old')
-    new = get_and_validate_param(form, 'new')
+    old = post_validate_param(form, 'old')
+    new = post_validate_param(form, 'new')
     return api.auth.change_password(old, new)
 
 

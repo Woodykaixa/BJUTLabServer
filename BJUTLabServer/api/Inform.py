@@ -3,7 +3,9 @@ from datetime import datetime
 from flask import session
 
 from BJUTLabServer import exception
-from ..utilities.misc import jsonify
+from ..utilities import (
+    jsonify
+)
 
 
 class InformAPI:

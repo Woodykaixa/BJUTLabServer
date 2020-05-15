@@ -8,7 +8,8 @@ class Validator:
     """
     ``Validator``提供了许多静态方法用于验证参数的正确性，只有经过验证的合法参数才能被api调用。
     所有的静态方法均接收一个tuple作为参数，tuple中的第1个元素(index 0)永远是参数的名字,第2个
-    元素是参数的值(value)，剩余参数取决于具体调用的静态方法。
+    元素是参数的值(value)，剩余参数取决于具体调用的静态方法。所有方法返回值都为tuple类型，第
+    一个元素是bool类型，表示验证是否通过，第二个类型是exception(如果验证不通过)或None.
     """
 
     __ValidateResult = (bool, Exception or None)
