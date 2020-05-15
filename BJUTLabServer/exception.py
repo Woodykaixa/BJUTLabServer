@@ -10,9 +10,10 @@ class APIReinitializationError(Exception):
 
 class ParameterException(WerkzeugException.HTTPException):
     """
-    当调用api时提供的参数与api的参数不同时，则抛出此异常。
     DEPRECATED!! - 为了返回信息的统一，不推荐使用此异常。缺少参数时应使用``MissingParameter``,
     参数不合法应使用``InvalidParameter``替代
+
+    当调用api时提供的参数与api的参数不同时，则抛出此异常。
     """
 
     def __init__(self, code, desc):
@@ -41,12 +42,6 @@ class MissingParameter(ParameterException):
 
 
 def FormatError(param_name: str, format_str: str = None) -> InvalidParameter:
-    """
-    这是一个看起来像异常类的函数，你完全可以按照抛出异常的方式使用它。
-    `
-        raise FormatError('id')
-    `
-    """
     desc = '{} has wrong format'.format(param_name)
     if format_str is not None:
         desc += '({})'.format(format_str)
@@ -59,3 +54,7 @@ def UnsupportedTypeError(type_code: int or str) -> InvalidParameter:
 
 def DateError(param_name: str, bound: list) -> InvalidParameter:
     return InvalidParameter(400, '{} is out of range({} seconds)'.format(param_name, bound))
+
+
+def RangeError(param_name: str, bound: list) -> InvalidParameter:
+    return InvalidParameter(400, '{} is out of range({})'.format(param_name, bound))

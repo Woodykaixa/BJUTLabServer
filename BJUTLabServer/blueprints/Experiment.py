@@ -3,12 +3,9 @@ from datetime import datetime
 from flask import Blueprint, request, session
 
 from ..api import BJUTLabAPI
-from ..exception import (
-    InvalidParameter,
-    MissingParameter
-)
 from ..utilities import (
     login_required,
+    get_validate_param,
     post_validate_param,
     parse_date_str,
     TIME_FORMAT,
@@ -23,18 +20,10 @@ ACCEPTABLE_ORDER_TYPE = [0]
 @ExpBP.route('/order', methods=['GET'])
 @login_required
 def get_order():
-    page_index = request.args.get('pageIndex', None, int)
-    page_size = request.args.get('size', None, int)
-    type_code = request.args.get('type', None, int)
-    for arg in [[page_index, 'pageIndex'], [page_size, 'size'], [type_code, 'type']]:
-        if arg[0] is None:
-            raise MissingParameter(400, arg[1])
-    if page_index < 1:
-        raise InvalidParameter(400, 'pageIndex must greater than 0')
-    if page_size < 1:
-        raise InvalidParameter(400, 'size must greater than 0')
-    if type_code not in ACCEPTABLE_ORDER_TYPE:
-        raise InvalidParameter(400, 'unsupported type: {}'.format(type_code))
+    args = request.args
+    page_index = get_validate_param(args, 'pageIndex', int, Validator.digit_in_range, ((1, None),))
+    page_size = get_validate_param(args, 'size', int, Validator.digit_in_range, ((1, None),))
+    type_code = get_validate_param(args, 'type', int, Validator.acceptable_types, (ACCEPTABLE_ORDER_TYPE,))
 
     return api.exp.get_order(page_index, page_size, type_code, session['id'])
 

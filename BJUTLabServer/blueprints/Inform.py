@@ -5,6 +5,7 @@ from flask import Blueprint, request
 from ..api import BJUTLabAPI
 from ..utilities import (
     none_check,
+    get_validate_param,
     post_validate_param,
     Validator,
     login_required,
@@ -19,24 +20,22 @@ ACCEPTABLE_INFORM_TYPE = ['0', '1']
 
 @InformBP.route('/inform_brief', methods=['GET'])
 def get_inform_brief():
-    type_code = request.args.get('type', None, type=int)
-    number = request.args.get('number', None, type=int)
-    page_index = request.args.get('pageIndex', None, type=int)
-    filter_str = request.args.get('filter', None, type=str)
-    check_result = none_check(400, 'Missing parameter. Index: {}',
-                              type_code, number, page_index)
-    if check_result['hasNone']:
-        raise check_result['exception']
+    args = request.args
+    type_code = get_validate_param(args, 'type', int, Validator.acceptable_types, (ACCEPTABLE_INFORM_TYPE,))
+    number = get_validate_param(args, 'number', int, Validator.digit_in_range, ((1, None),))
+    page_index = get_validate_param(args, 'pageIndex', int, Validator.digit_in_range, ((1, None),))
+    filter_str = get_validate_param(args, 'filter', str, None, None, True)
+
     return api.inform.get_inform_brief(type_code, number, page_index, filter_str)
 
 
 @InformBP.route('/inform', methods=['GET'])
 def get_inform():
-    type_code = request.args.get('type', None, type=int)
-    inform_id = request.args.get('id', None, type=int)
-    check_result = none_check(400, 'Missing parameter', type_code, inform_id)
-    if check_result['hasNone']:
-        raise check_result['exception']
+    args = request.args
+
+    type_code = get_validate_param(args, 'type', int, Validator.acceptable_types, (ACCEPTABLE_INFORM_TYPE,))
+    inform_id = get_validate_param(args, 'id', int, Validator.digit_in_range, ((1, None),))
+
     return api.inform.get_inform(type_code, inform_id)
 
 

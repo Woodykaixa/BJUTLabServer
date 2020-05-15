@@ -1,10 +1,10 @@
 import json
 import typing
-from datetime import datetime, timedelta, date
+from datetime import date
 from functools import wraps
 
 from flask import make_response, session
-from werkzeug.datastructures import ImmutableMultiDict
+from werkzeug.datastructures import ImmutableMultiDict, MultiDict
 
 from .. import exception
 
@@ -32,20 +32,18 @@ def none_check(code: int, msg: str, *args):
     }
 
 
-def post_validate_param(form: ImmutableMultiDict, key: str,
-                        validator: typing.Callable = None, v_param: tuple = None,
-                        nullable: bool = False) -> str or None:
+def __validate_param(key, value, validator: typing.Callable, v_param: tuple, nullable: bool):
     """
-    从``form``中获取参数，并验证参数是否合法。只有合法的参数会被返回。不合法的参数会抛出异常。
-    :param form: 存放参数的字典
-    :param key: 待获取参数的键
-    :param validator: 验证参数是否合法的函数，参数为``key``,``value``,``v_param``。如果为None
+    参数验证函数，用于验证``value``是否符合``validator``定义的规则。只有通过验证的参数会被返回。
+    参数不合法则会直接抛出异常。
+    :param key: 参数名
+    :param value: 参数值
+    :param validator: 参数验证函数。接收的参数为tuple(``key``,``value``,``v_param``)。如果为None
                       则认为参数合法
-    :param v_param: 传给``validator``的额外参数，可以为None，
-    :param nullable: ``value``可以为None，此时会直接返回None.
-    :return:
+    :param v_param: 验证函数使用的额外参数
+    :param nullable: 参数是否可以为None，如果为True会直接返回None
+    :return: value或None(如果nullable=True)
     """
-    value = form[key] if key in form else None
     if value is None:
         if nullable:
             return value
@@ -57,6 +55,43 @@ def post_validate_param(form: ImmutableMultiDict, key: str,
     if valid:
         return value
     raise e
+
+
+def get_validate_param(args: MultiDict, key: str, t: typing.Callable = None,
+                       validator: typing.Callable = None, v_param: tuple = None,
+                       nullable: bool = False):
+    """
+    从``args``中获取参数，使用``utilities.misc.__validate_param``验证是否合法。
+    只有合法的参数会被返回。不合法的参数会抛出异常。
+
+    :param args: 存放参数的字典
+    :param key: 参数名
+    :param t: 参数类型转换函数
+    :param validator: 参数验证函数
+    :param v_param: 传给``validator``的额外参数
+    :param nullable: 参数是否可以为None，如果为True会直接返回None
+    :return: 等同于flask的args.get(key, default=None, type=t)
+    """
+    value = args.get(key, None, t)
+    return __validate_param(key, value, validator, v_param, nullable)
+
+
+def post_validate_param(form: ImmutableMultiDict, key: str,
+                        validator: typing.Callable = None, v_param: tuple = None,
+                        nullable: bool = False) -> str or None:
+    """
+    从``form``中获取参数，使用``utilities.misc.__validate_param``验证是否合法。
+    只有合法的参数会被返回。不合法的参数会抛出异常。
+
+    :param form: 存放参数的字典
+    :param key: 参数名
+    :param validator: 参数验证函数
+    :param v_param: 传给``validator``的额外参数
+    :param nullable: 参数是否可以为None，如果为True会直接返回None
+    :return: 等同于form[key]
+    """
+    value = form[key] if key in form else None
+    return __validate_param(key, value, validator, v_param, nullable)
 
 
 def make_error_response(e: exception.WerkzeugException.HTTPException):
