@@ -2,9 +2,9 @@
 <html lang="zh-cn">
 
 <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8"/>
     <title>BJUTLabServer API</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <style>
         body {
             margin: 0;
@@ -56,7 +56,28 @@
             font-size: 1.6rem;
         }
 
-        .list .code-container {
+        .list h3 {
+            font-size: 1.4rem;
+            padding-left: 1rem;
+        }
+
+        .list h4 {
+            font-size: 1rem;
+        }
+
+        .list .api-name {
+            width: available;
+            background-color: #d9f0f8;
+            margin: 0 0 0.1rem 2rem;
+            border-radius: 0.2rem;
+            padding: 1rem 1rem 1rem 0.8rem;
+        }
+
+        .list .api-name .subset {
+            font-family: 'JetBrains Mono', Consolas, sans-serif;
+        }
+
+        .list .li-content {
             overflow: auto;
             background-color: #E3F2FD;
             border-radius: 1rem;
@@ -64,15 +85,19 @@
             padding-right: 1.4rem;
         }
 
-        .code-container code {
+        code {
             font-family: 'JetBrains Mono', Consolas, sans-serif;
         }
 
-        .code-container code .string {
-            color: #5890ad;
+        code .string {
+            color: #666264;
         }
 
-        .code-container code .comment {
+        code .param {
+            color: #4e85b9;
+        }
+
+        code .comment {
             color: #8a6343;
         }
 
@@ -88,43 +113,51 @@
 </head>
 
 <body>
-    <nav class="title-bar">
-        <h1 class="title">
-            BJUTLabServer API
-        </h1>
-        <span class="subtitle">Container: gunicorn 20.0.4.&nbsp;&nbsp;&nbsp;Started at: {{time}}</span>
-    </nav>
-    <div class="container">
-        <ul class="list">
-            <li>
-                <h2>BJUTLabServer API Version</h2>
-                <p class="version-code">0.1.0</p>
-            </li>
-            <li>
-                <h2>How to use API</h2>
-                <pre class="code-container">
+<nav class="title-bar">
+    <h1 class="title">
+        BJUTLabServer API
+    </h1>
+    <span class="subtitle">Container: gunicorn 20.0.4.&nbsp;&nbsp;&nbsp;Started at: {{ time }}</span>
+</nav>
+<div class="container">
+    <ul class="list">
+        <li>
+            <h2>BJUTLabServer API Version</h2>
+            <p class="version-code li-content">{{ ver }}</p>
+        </li>
+        <li>
+            <h2>How to use API</h2>
+            <pre class="li-content">
                     <code class="code">
-fetch(<span class="string">'https://api.bjutlab.cn/&lt;subset_name&gt;/&lt;API_name&gt;?&lt;parameters&gt;'</span>).then(res => {
+fetch(<span class="string">'https://api.bjutlab.cn/&lt;subset_name&gt;/&lt;API_name&gt;?&lt;parameters&gt;'</span>).then(<span class="param">res</span> => {
     <span class="comment">// ...</span>
 })
 
 fetch(<span class="string">'https://api.bjutlab.cn/&lt;subset_name&gt;/&lt;API_name&gt;'</span>, {
-    method: <span class="string">'POST'</span>,
-    body: JSON.stringify({
+    <span class="param">method</span>: <span class="string">'POST'</span>,
+    <span class="param">body</span>: JSON.stringify({
         <span class="comment">// parameters</span>
     })
-}).then(res => {
+}).then(<span class="param">res</span> => {
     <span class="comment">// ...</span>
 });
                     </code>
                 </pre>
-            </li>
-            <li>
-                <h2>APIs</h2>
-                <p>coming soon...</p>
-            </li>
-        </ul>
-    </div>
+        </li>
+        <li>
+            <h2>APIs</h2>
+            <div class="li-content">
+                {% for APIsubset in APIs %}
+                    <h3>Subset: <span class="subset">{{ APIsubset }}</span></h3>
+                    {% for APIname in APIs[APIsubset] %}
+                        <h4 class="api-name">{{ APIname }}</h4>
+                    {% endfor %}
+
+                {% endfor %}
+            </div>
+        </li>
+    </ul>
+</div>
 </body>
 
 </html>
