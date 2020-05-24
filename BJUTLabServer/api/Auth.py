@@ -45,7 +45,7 @@ class AuthAPI:
 
     def login(self, school_id: str, password: str, user_type: int):
         proc_name = AuthAPI.__login_proc[user_type]
-        md5_pwd = Encryptor.md5(password)
+        md5_pwd = Encryptor.md5(password)  # TODO: 前端发送过来的密码应当是md5加密后的
         dataset, code = self._sql.run_proc(proc_name, 1, (school_id, md5_pwd))
         self._logger.info(str(dataset))
         self._logger.info(code)
