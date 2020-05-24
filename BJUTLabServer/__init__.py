@@ -1,5 +1,5 @@
 def create_app():
-    from flask import Flask, render_template
+    from flask import Flask, render_template, request
     from flask_cors import CORS
     from .exception import ParameterException, WerkzeugException
     from .utilities import make_error_response
@@ -31,6 +31,10 @@ def create_app():
     @app.route('/')
     def hi():
         return render_template('index.html', time=STARTUP_TIME, APIs=APIs, ver=VERSION_CODE)
+
+    @app.before_request
+    def log_visitor():
+        Log.get_logger(__name__).info('visit: [{}] from: [{}]'.format(request.url, request.host))
 
     @app.errorhandler(ParameterException)
     def handle_parameter_exception(e):
