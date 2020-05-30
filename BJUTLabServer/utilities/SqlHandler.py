@@ -1,3 +1,6 @@
+"""
+`SqlHandler.py` 提供 :class:`SQLHandler` 来处理数据库操作。
+"""
 import json
 import threading
 import pymysql
@@ -6,6 +9,9 @@ from .Log import Log
 
 
 class SQLHandler:
+    """
+    `SQLHandler` 封装了 `pymysql` 的操作，使其适用于项目的存储过程。
+    """
     def __init__(self, conf_path: str):
         self._logger = Log.get_logger('BJUTLabServer.SQLHandler')
         self._logger.info('Read database settings from path: {}'.format(conf_path))
@@ -15,6 +21,9 @@ class SQLHandler:
         self.connect_database()
 
     def connect_database(self):
+        """
+        与数据库建立连接，并保存这个连接对象。
+        """
         self._connection = pymysql.connect(
             host=self._db_config['host'],
             user=self._db_config['user'],
@@ -37,7 +46,7 @@ class SQLHandler:
         执行sql语句，获取前n条结果
         :param sql: sql语句
         :param top_n: 前n条结果
-        :return: 查询结果集
+        :return: 查询结果集(一个tuple，tuple中的每一个元素是一条结果)
         """
         try:
             cursor = self._connection.cursor(pymysql.cursors.Cursor)
@@ -53,7 +62,7 @@ class SQLHandler:
 
     def run_proc(self, proc_name, top_n, param: tuple = ()):
         """
-        调用存储过程。返回结果集以及一个out参数。BJUTLab的存储过程均有且只有一个OUT参数。
+        调用存储过程。返回结果集以及一个 `OUT` 参数。BJUTLab的存储过程均有且只有一个 `OUT` 参数。
         """
         try:
             self.lock.acquire(True, 5)

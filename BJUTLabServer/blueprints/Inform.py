@@ -4,7 +4,6 @@ from flask import Blueprint, request
 
 from ..api import BJUTLabAPI
 from ..utilities import (
-    none_check,
     get_validate_param,
     post_validate_param,
     Validator,
