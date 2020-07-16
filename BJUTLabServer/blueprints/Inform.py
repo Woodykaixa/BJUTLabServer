@@ -17,7 +17,7 @@ InformBP = Blueprint('Inform', __name__, url_prefix='/Inform')
 ACCEPTABLE_INFORM_TYPE = ['0', '1']
 
 
-@InformBP.route('/inform_brief', methods=['GET'])
+@InformBP.route('/informs', methods=['GET'])
 def get_inform_brief():
     args = request.args
     type_code = get_validate_param(args, 'type', int, Validator.acceptable_types, (ACCEPTABLE_INFORM_TYPE,))
