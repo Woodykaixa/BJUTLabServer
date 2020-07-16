@@ -32,7 +32,9 @@ def __validate_param(key, value, validator: typing.Callable, v_param: tuple, nul
         raise exception.MissingParameter(400, key)
     if validator is None:
         return value
-    validator_param = (key, value,) + v_param if v_param else (key, value,)
+    validator_param = (key, value,)
+    if v_param:
+        validator_param += v_param
     valid, e = validator(validator_param)
     if valid:
         return value

@@ -46,3 +46,13 @@ def create_order():
     use_d = parse_date_str('use', use)
     sid = session['id']
     return api.exp.create_order(sid, commit_dt, use_d, time_range, lab_id, usage, int(type_code))
+
+
+@ExpBP.route('/labs', methods=['GET'])
+def get_labs():
+    args = request.args
+    number = get_validate_param(args, 'number', int, Validator.digit_in_range, ((1, None),))
+    page_index = get_validate_param(args, 'pageIndex', int, Validator.digit_in_range, ((1, None),))
+    filter_str = get_validate_param(args, 'filter', str, Validator.string_format, (
+        r'^(name->\w{1,30}|principal->G\d{8}|open->[01]|time->\d{2}:\d{2}~\d{2}:\d{2}|day->[1-7]{1,7})$',), True)
+    return api.exp.get_labs(page_index, number, filter_str)
