@@ -131,11 +131,12 @@ def jsonify(obj: object):
 
 def parse_date_str(param_name: str, date_str: str) -> date:
     """
-    将 `date_str` 转换为 :class:`date` 类型
+    将 `date_str` 转换为 :class:`date` 类型，转换失败自动抛出异常。
 
     :param param_name: API参数的名字，转换 `date_str` 失败时抛出的异常用这个参数名给用户提示。
     :param date_str: 字符串形式的日期
     :return: 返回转换后的date对象
+    :except FormatError: 如果转换失败则抛出此异常
     """
     try:
         return date.fromisoformat(date_str)

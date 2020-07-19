@@ -12,6 +12,7 @@ class SQLHandler:
     """
     `SQLHandler` 封装了 `pymysql` 的操作，使其适用于项目的存储过程。
     """
+
     def __init__(self, conf_path: str):
         self._logger = Log.get_logger('BJUTLabServer.SQLHandler')
         self._logger.info('Read database settings from path: {}'.format(conf_path))
@@ -33,7 +34,7 @@ class SQLHandler:
         )
 
     @staticmethod
-    def read_config(conf_path):
+    def read_config(conf_path: str):
         """
         从db.json中读取数据库连接参数。
         :return: json格式的参数信息。
@@ -41,28 +42,31 @@ class SQLHandler:
         f = open(conf_path, 'r')
         return json.load(f)
 
-    def query(self, sql, top_n):
+    def query(self, sql: str, top_n: int = 1):
         """
         执行sql语句，获取前n条结果
         :param sql: sql语句
-        :param top_n: 前n条结果
-        :return: 查询结果集(一个tuple，tuple中的每一个元素是一条结果)
+        :param top_n: 取前n条结果（如果记录数量大于n，则只返回前n条结果，否则返回全部结果）
+        :return: 查询结果集(一个tuple，tuple中的每一个元素是一条结果)，结果集数量
         """
         try:
             cursor = self._connection.cursor(pymysql.cursors.Cursor)
             cursor.execute(sql)
             res = cursor.fetchmany(top_n)
             cursor.close()
-            return res
+            return res, len(res)
         except pymysql.OperationalError as oe:
             if oe.args[0] == 2006:
                 self._logger.info('数据库连接断开，重新连接。')
                 self.connect_database()
                 return self.query(sql, top_n)
 
-    def run_proc(self, proc_name, top_n, param: tuple = ()):
+    def run_proc(self, proc_name: str, top_n: int = 1, param: tuple = ()):
         """
         调用存储过程。返回结果集以及一个 `OUT` 参数。BJUTLab的存储过程均有且只有一个 `OUT` 参数。
+        :param proc_name: 存储过程名
+        :param top_n: 取前n条结果（如果记录数量大于n，则只返回前n条结果，否则返回全部结果）
+        :param param: 存储过程参数，不需要设置最后一个OUT参数
         """
         try:
             self.lock.acquire(True, 5)

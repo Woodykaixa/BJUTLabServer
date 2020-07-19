@@ -23,22 +23,16 @@ def get_orders():
     args = request.args
     page_index = get_validate_param(args, 'pageIndex', int, Validator.digit_in_range, ((1, None),))
     page_size = get_validate_param(args, 'size', int, Validator.digit_in_range, ((1, None),))
-    type_code = get_validate_param(args, 'type', int, Validator.acceptable_types, (ACCEPTABLE_ORDER_TYPE,))
 
-    return api.exp.get_order(page_index, page_size, type_code, session['id'])
+    return api.exp.get_orders(page_index, page_size, session['type'], session['id'])
 
 
 @ExpBP.route('/order', methods=['GET'])
 @login_required
 def get_order():
-    args = request.args
-    order_id = get_validate_param(args, 'order_id', int, Validator.digit_in_range, ((1, None),))
-    type_code = get_validate_param(args, 'type', int, Validator.digit_in_range, ((1, 2),))
-    user_type = session['type']
-    if user_type != 2 and user_type != type_code:
-        raise Unauthorized('Cannot fetch this order info due to your user level.')
-    user_id = session['id']
-    return api.exp.get_order(order_id, type_code, user_id)
+    order_id = get_validate_param(request.args, 'order_id', int, Validator.digit_in_range, ((1, None),))
+
+    return api.exp.get_order(order_id, session['type'], session['id'])
 
 
 @ExpBP.route('/order', methods=['POST'])
@@ -52,13 +46,11 @@ def create_order():
                                      (r'^\d{1,2}:\d{2}~\d{1,2}:\d{2}$',))
     lab_id = post_validate_param(form, 'lab_id', Validator.isdigit)
     usage = post_validate_param(form, 'usage', Validator.string_length, ((None, 200),))
-    type_code = post_validate_param(form, 'type',
-                                    Validator.acceptable_types, (ACCEPTABLE_ORDER_TYPE,))
-
     commit_dt = datetime.strptime(commit, TIME_FORMAT)
     use_d = parse_date_str('use', use)
-    sid = session['id']
-    return api.exp.create_order(sid, commit_dt, use_d, time_range, lab_id, usage, int(type_code))
+    instruments = request.values.getlist('instruments[]')
+    return api.exp.create_order(session['id'], session['type'], commit_dt, use_d,
+                                time_range, lab_id, usage, instruments)
 
 
 @ExpBP.route('/labs', methods=['GET'])
