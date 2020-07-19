@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from ..exception import APIReinitializationError
+from ..exception import APIReinitializationError, WerkzeugException
 from ..utilities import (
     jsonify
 )
@@ -12,6 +12,7 @@ class ExpAPI:
     # 通过对这个元组使用index方法获get_labs调用存储过程时应当将filter插入到参数中的位置
     _GET_LAB_FILTER_KEYS = ('name', 'principal', 'open', 'time', 'day')
 
+    _GET_ORDER_RECORD_PROC = ('get_student_order_record',)
     _GET_LAB_DAY_NUM_TO_CHAR = ('一', '二', '三', '四', '五', '六', '日')
 
     def __init__(self, logger, sql):
@@ -26,8 +27,8 @@ class ExpAPI:
             ExpAPI.__exp_instance = ExpAPI(logger, sql)
         return ExpAPI.__exp_instance
 
-    def get_order(self, page_index, page_size, type_code: int, sid: str):
-        proc_name = 'get_student_order_record'
+    def get_orders(self, page_index, page_size, type_code: int, sid: str):
+        proc_name = 'get_student_order_record'  # FIXME: When teacher operation is finished, fixme
         param = (page_size, page_index, sid, 0, 0, 0, 0, 0)
         dataset, count = self._sql.run_proc(proc_name, page_size, param)
         self._logger.info('dataset: {}'.format(dataset))
@@ -43,6 +44,27 @@ class ExpAPI:
             }
             order_list.append(order_record)
         return jsonify(order_list)
+
+    def get_order(self, order_id: int, type_code: int, user_id: str):
+        """
+        NOTE:
+            由于目前仅支持学生操作，所以api目前未考虑`type_code=1`的情况。同时由于设计疏忽，
+            目前该api的实现为使用sql语句直接查询，而不是调用存储过程。
+        FIXME: Rewrite with Stored Procedure
+        FIXME: When teacher operation is finished, fixme
+        """
+        dataset = self._sql.query(f'SELECT * from student_order_record WHERE student_id = {order_id}', 1)[0]
+        if user_id != dataset[1]:
+            raise WerkzeugException.Unauthorized('Cannot fetch this order info due to you are not the orderer.')
+        return jsonify({
+            'user_id': dataset[1],
+            'order_at': dataset[2],
+            'use_at': dataset[3],
+            'range': dataset[4],
+            'lab_id': dataset[5],
+            'usage': dataset[6],
+            'status': dataset[7]
+        })
 
     def create_order(self, sid: str, commit_dt: datetime, use_d: date,
                      time_range: str, lab_id: int, usage: str, type_code: int):

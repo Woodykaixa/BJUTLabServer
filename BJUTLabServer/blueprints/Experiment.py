@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from werkzeug.exceptions import Unauthorized
 from flask import Blueprint, request, session
 
 from ..api import BJUTLabAPI
@@ -17,15 +17,28 @@ api = BJUTLabAPI.get_instance()
 ACCEPTABLE_ORDER_TYPE = [0]
 
 
-@ExpBP.route('/order', methods=['GET'])
+@ExpBP.route('/orders', methods=['GET'])
 @login_required
-def get_order():
+def get_orders():
     args = request.args
     page_index = get_validate_param(args, 'pageIndex', int, Validator.digit_in_range, ((1, None),))
     page_size = get_validate_param(args, 'size', int, Validator.digit_in_range, ((1, None),))
     type_code = get_validate_param(args, 'type', int, Validator.acceptable_types, (ACCEPTABLE_ORDER_TYPE,))
 
     return api.exp.get_order(page_index, page_size, type_code, session['id'])
+
+
+@ExpBP.route('/order', methods=['GET'])
+@login_required
+def get_order():
+    args = request.args
+    order_id = get_validate_param(args, 'order_id', int, Validator.digit_in_range, ((1, None),))
+    type_code = get_validate_param(args, 'type', int, Validator.digit_in_range, ((1, 2),))
+    user_type = session['type']
+    if user_type != 2 and user_type != type_code:
+        raise Unauthorized('Cannot fetch this order info due to your user level.')
+    user_id = session['id']
+    return api.exp.get_order(order_id, type_code, user_id)
 
 
 @ExpBP.route('/order', methods=['POST'])
