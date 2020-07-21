@@ -18,14 +18,14 @@ ACCEPTABLE_INFORM_TYPE = ['0', '1']
 
 
 @InformBP.route('/informs', methods=['GET'])
-def get_inform_brief():
+def get_informs():
     args = request.args
     type_code = get_validate_param(args, 'type', int, Validator.acceptable_types, (ACCEPTABLE_INFORM_TYPE,))
     number = get_validate_param(args, 'number', int, Validator.digit_in_range, ((1, None),))
     page_index = get_validate_param(args, 'pageIndex', int, Validator.digit_in_range, ((1, None),))
     filter_str = get_validate_param(args, 'filter', str, None, None, True)
 
-    return api.inform.get_inform_brief(type_code, number, page_index, filter_str)
+    return api.inform.get_informs(type_code, number, page_index, filter_str)
 
 
 @InformBP.route('/inform', methods=['GET'])

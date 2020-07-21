@@ -34,7 +34,19 @@ class InformAPI:
             InformAPI.__inform_instance = InformAPI(logger, sql)
         return InformAPI.__inform_instance
 
-    def get_inform_brief(self, type_code: int, number: int, page_index: int, filter_str: str):
+    def get_informs(self, type_code: int, number: int, page_index: int, filter_str: str):
+        """
+        获取所有通知的简略信息。可以通过filter_str实现条件过滤。
+
+        使用情景:
+
+            向用户展示所有通知的清单时，调用此api获取所有通知的简略信息。
+
+        :param type_code: 通知类型
+        :param number: 每页显示的数量
+        :param page_index: 分页下标
+        :param filter_str: 过滤条件
+        """
         try:
             api_get_inform_brief = self.__get_inform_brief_method_list[type_code]
             return jsonify(api_get_inform_brief(number, page_index, filter_str))
@@ -111,6 +123,17 @@ class InformAPI:
         return inform
 
     def get_inform(self, type_code: int, inform_id: int):
+        """
+        根据`inform_id`和`type_code`获取一个通知的所有信息。
+
+        使用情景:
+
+            用户面前有一个清单，列出了所有的通知。用户点击清单的某一行，则会调用本API返回该行
+            通知的所有信息。
+
+        :param type_code: 通知类型
+        :param inform_id: 通知id
+        """
         try:
             proc_name = InformAPI.__get_inform_procedure_list[type_code]
             dataset, code = self._sql.run_proc(proc_name, 1, (inform_id,))
@@ -138,6 +161,15 @@ class InformAPI:
 
     def create_inform(self, title: str, content: str, type_code: int, create: datetime,
                       nullable_expire: datetime):
+        """
+        发布一个通知。
+
+        :param title: 标题
+        :param content: 正文
+        :param type_code: 通知类型
+        :param create: 通知发布时间
+        :param nullable_expire: 通知过期时间（只有选择发布临时通知时，需要传递此参数）
+        """
         principal = session['id']
         proc = InformAPI.__create_inform_procedure_list[type_code]
         param = [title, content, create, principal]
