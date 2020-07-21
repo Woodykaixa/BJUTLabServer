@@ -8,7 +8,9 @@ from ..utilities import (
     Log,
     post_validate_param,
     Validator,
-    login_required
+    login_required,
+    STUDENT_ID_STRING_FORMAT,
+    TEACHER_ID_STRING_FORMAT
 )
 
 AuthBP = Blueprint('Auth', __name__, url_prefix='/Auth')
@@ -28,8 +30,8 @@ def register_user():
     user_type = post_validate_param(form, 'type', Validator.acceptable_types,
                                     (ACCEPTABLE_USER_TYPE,))
 
-    if (user_type == '0' and not re.match(r'\d{8}', school_id)) or \
-            (user_type != '0' and not re.match(r'G\d{8}', school_id)):
+    if (user_type == '0' and not re.match(STUDENT_ID_STRING_FORMAT, school_id)) or \
+            (user_type != '0' and not re.match(TEACHER_ID_STRING_FORMAT, school_id)):
         raise InvalidParameter(400, 'id has wrong format.')
 
     return api.auth.register_user(school_id, name, password, int(user_type))
@@ -39,7 +41,7 @@ def register_user():
 def register_principal():
     form = request.form
     school_id = post_validate_param(form, 'id', Validator.string_format,
-                                    (r'^G\d{8}$',))
+                                    (TEACHER_ID_STRING_FORMAT,))
     name = post_validate_param(form, 'name', Validator.string_length, ((1, 10),))
     password = post_validate_param(form, 'password')
     office = post_validate_param(form, 'office', Validator.string_length, ((1, 15),))
@@ -59,8 +61,8 @@ def login():
     user_type = post_validate_param(form, 'type', Validator.acceptable_types,
                                     (ACCEPTABLE_USER_TYPE,))
 
-    if (user_type == '0' and not re.match(r'^\d{8}$', school_id)) or \
-            (user_type != '0' and not re.match(r'^G\d{8}$', school_id)):
+    if (user_type == '0' and not re.match(STUDENT_ID_STRING_FORMAT, school_id)) or \
+            (user_type != '0' and not re.match(TEACHER_ID_STRING_FORMAT, school_id)):
         raise InvalidParameter(400, 'id has wrong format.')  # FIXME: 为Validator.string_format提供多个匹配模式
 
     return api.auth.login(school_id, password, int(user_type))

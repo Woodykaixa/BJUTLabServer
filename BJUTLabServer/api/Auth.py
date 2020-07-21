@@ -27,17 +27,15 @@ class AuthAPI:
 
     def register_user(self, school_id: str, name: str, password: str, user_type: int):
         proc_name = 'create_student_user'
-        md5_pwd = Encryptor.md5(password)
-        dataset, code = self._sql.run_proc(proc_name, 1, (school_id, name, md5_pwd))
+        dataset, code = self._sql.run_proc(proc_name, 1, (school_id, name, password))
         return {
             'return code': code
         }
 
     def register_principal(self, sid: str, name: str, password: str, office: str, phone: str, email: str):
         proc = 'create_principal'
-        md5_pwd = Encryptor.md5(password)
 
-        param = (name, sid, md5_pwd, office, email, phone)
+        param = (name, sid, password, office, email, phone)
         _, code = self._sql.run_proc(proc, 1, param)
         return {
             'return code': code
@@ -69,7 +67,7 @@ class AuthAPI:
         }
 
     def change_password(self, old: str, new: str):
-        if Encryptor.md5(old) == session['password']:
+        if old == session['password']:
             proc_name = AuthAPI.__change_password_proc[session['type']]
             school_id = session['id']
             name = session['name']

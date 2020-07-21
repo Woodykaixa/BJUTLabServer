@@ -13,6 +13,12 @@ from .. import exception
 
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
+STUDENT_ID_FORMAT = r'\d{8}'
+TEACHER_ID_FORMAT = r'\d{5}'
+
+STUDENT_ID_STRING_FORMAT = r'^{}$'.format(STUDENT_ID_FORMAT)
+TEACHER_ID_STRING_FORMAT = r'^{}$'.format(TEACHER_ID_FORMAT)
+
 
 def __validate_param(key, value, validator: typing.Callable, v_param: tuple, nullable: bool):
     """
