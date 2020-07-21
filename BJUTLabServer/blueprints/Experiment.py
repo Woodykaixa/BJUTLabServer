@@ -1,5 +1,5 @@
 from datetime import datetime
-from werkzeug.exceptions import Unauthorized
+
 from flask import Blueprint, request, session
 
 from ..api import BJUTLabAPI
@@ -61,3 +61,11 @@ def get_labs():
     filter_str = get_validate_param(args, 'filter', str, Validator.string_format, (
         r'^(name->\w{1,30}|principal->G\d{8}|open->[01]|time->\d{2}:\d{2}~\d{2}:\d{2}|day->[1-7]{1,7})$',), True)
     return api.exp.get_labs(page_index, number, filter_str)
+
+
+@ExpBP.route('/lab/<int:lab_id>', methods=['GET'])
+def get_lab(lab_id: int):
+    ok, err = Validator.digit_in_range(('lab_id', lab_id, (1, None)))
+    if not ok:
+        raise err
+    return api.exp.get_lab(lab_id)

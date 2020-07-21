@@ -109,7 +109,7 @@ class ExpAPI:
         """
         创建一个实验室预约申请。不需要发送申请人的学号等信息，后端直接从session中提取。
 
-        使用场景:
+        使用情景:
 
             用户想要预约使用实验室，则通过此API发送一个申请。
 
@@ -135,6 +135,18 @@ class ExpAPI:
         })
 
     def get_labs(self, page_index: int, number: int, filter_str: str or None):
+        """
+        获取所有实验室的简略信息。filter是为了实现实验室查找功能而扩展的参数，可
+        以通过filter实现条件过滤。
+
+        使用情景:
+
+            用户选择想要预约的实验室时，前端调用此api获取所有实验室信息。
+
+        :param page_index: 分页的下标
+        :param number: 每页显示数量
+        :param filter_str: 过滤条件
+        """
         proc_name = 'get_lab'
         param = [number, page_index, None, None, None, None]
         if filter_str is None:
@@ -162,3 +174,34 @@ class ExpAPI:
                 'open': record[3]
             })
         return jsonify(return_data)
+
+    def get_lab(self, lab_id: int):
+        """
+        获取`lab_id`对应的实验室信息，包括负责人信息以及实验室中的可用仪器。
+
+        使用情景:
+
+            用户面前有一个清单，列出来所有实验室。用户点击清单的某一行，则会调用本API返回该行的实验室的详细信息。
+
+        :param lab_id: 实验室id
+        """
+        dataset, count = self._sql.query_all(
+            f'select lab_name, principal_sid, open, open_time_range, open_day_range,'
+            f'       introduction, instrument_serial from labs '
+            f'  inner join instruments on labs.lab_id=instruments.in_lab_id '
+            f'where labs.lab_id={lab_id}'
+        )
+
+        instruments = []
+        for record in dataset:
+            instruments.append(record[6])
+        result = {
+            'lab_name': dataset[0][0],
+            'principal_sid': dataset[0][1],
+            'open': dataset[0][2],
+            'time_range': dataset[0][3],
+            'days': dataset[0][4],
+            'intro': dataset[0][5],
+            'instruments': instruments
+        }
+        return jsonify(result)

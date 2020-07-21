@@ -42,7 +42,7 @@ class SQLHandler:
         f = open(conf_path, 'r')
         return json.load(f)
 
-    def query(self, sql: str, top_n: int = 1):
+    def query(self, sql: str, top_n: int or str = 1):
         """
         执行sql语句，获取前n条结果
         :param sql: sql语句
@@ -60,6 +60,24 @@ class SQLHandler:
                 self._logger.info('数据库连接断开，重新连接。')
                 self.connect_database()
                 return self.query(sql, top_n)
+
+    def query_all(self, sql: str):
+        """
+        执行sql语句，获取全部结果
+        :param sql: sql语句
+        :return: 查询结果集，结果集数量
+        """
+        try:
+            cursor = self._connection.cursor(pymysql.cursors.Cursor)
+            cursor.execute(sql)
+            res = cursor.fetchall()
+            cursor.close()
+            return res, len(res)
+        except pymysql.OperationalError as oe:
+            if oe.args[0] == 2006:
+                self._logger.info('数据库连接断开，重新连接。')
+                self.connect_database()
+                return self.query_all(sql)
 
     def run_proc(self, proc_name: str, top_n: int = 1, param: tuple = ()):
         """
