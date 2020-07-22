@@ -26,6 +26,14 @@ class AuthAPI:
         return AuthAPI.__auth_instance
 
     def register_user(self, school_id: str, name: str, password: str, user_type: int):
+        """
+        注册用户。
+
+        :param school_id: 学生学号或教师工号
+        :param name: 姓名
+        :param password: 密码（加密后）
+        :param user_type: 注册类型
+        """
         proc_name = 'create_student_user'
         dataset, code = self._sql.run_proc(proc_name, 1, (school_id, name, password))
         return {
@@ -33,6 +41,16 @@ class AuthAPI:
         }
 
     def register_principal(self, sid: str, name: str, password: str, office: str, phone: str, email: str):
+        """
+        注册管理员。
+
+        :param sid: 管理员教师的工号
+        :param name: 姓名
+        :param password: 密码（加密后）
+        :param office: 办公室地址
+        :param phone: 联系方式（手机）
+        :param email: 邮箱
+        """
         proc = 'create_principal'
 
         param = (name, sid, password, office, email, phone)
@@ -42,6 +60,13 @@ class AuthAPI:
         }
 
     def login(self, school_id: str, password: str, user_type: int):
+        """
+        用户或实验室管理员的登录接口。
+
+        :param school_id: 学/工号
+        :param password: 姓名
+        :param user_type: 用户类型
+        """
         proc_name = AuthAPI.__login_proc[user_type]
         dataset, code = self._sql.run_proc(proc_name, 1, (school_id, password))
         self._logger.info(str(dataset))
@@ -67,6 +92,12 @@ class AuthAPI:
         }
 
     def change_password(self, old: str, new: str):
+        """
+        修改密码。
+
+        :param old: 旧密码
+        :param new: 新密码
+        """
         if old == session['password']:
             proc_name = AuthAPI.__change_password_proc[session['type']]
             school_id = session['id']
@@ -82,6 +113,10 @@ class AuthAPI:
 
     @staticmethod
     def logout():
+        """
+        用户登出接口。
+
+        """
         name = session['name']
         session.clear()
         return jsonify({
@@ -89,6 +124,9 @@ class AuthAPI:
         })
 
     def test_session(self):
+        """
+        测试登录功能用的api。
+        """
         self._logger.info('hello, {}'.format(session['name']))
 
         return jsonify({

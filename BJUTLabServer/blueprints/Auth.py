@@ -63,7 +63,7 @@ def login():
 
     if (user_type == '0' and not re.match(STUDENT_ID_STRING_FORMAT, school_id)) or \
             (user_type != '0' and not re.match(TEACHER_ID_STRING_FORMAT, school_id)):
-        raise InvalidParameter(400, 'id has wrong format.')  # FIXME: 为Validator.string_format提供多个匹配模式
+        raise InvalidParameter(400, 'id has wrong format.')  # TODO: 为Validator.string_format提供多个匹配模式
 
     return api.auth.login(school_id, password, int(user_type))
 
