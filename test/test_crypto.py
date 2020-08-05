@@ -6,8 +6,9 @@ with open('test_rsa_key', 'rb') as f:
     rsa_key = f.read()
 
 Crypto.load_config({
-    'AES_KEY': b'12345678123456781234567812345678',
-    'RSA_PRI_KEY': rsa_key
+    'aes': b'12345678123456781234567812345678',
+    'rsa': rsa_key,
+    'nonce': b'12345678'
 })
 
 

@@ -15,16 +15,6 @@ class Crypto:
     _AES_CIPHER = None
 
     @staticmethod
-    def __my_pad(data_to_pad: bytes, block_size: int):
-        pass
-
-    @staticmethod
-    def rsa_keygen():
-        key = RSA.generate(1024)
-        with open('test_rsa_key', 'wb') as f:
-            f.write(key.exportKey())
-
-    @staticmethod
     def load_config(secret_keys: dict):
         """
         设置密钥字典。
@@ -50,7 +40,7 @@ class Crypto:
             :param content: 待加密字符串
             :return: 密文的字节数组
             """
-            cipher = AES.new(Crypto._KEYS['AES_KEY'], AES.MODE_GCM, nonce='nmd wsm'.encode())
+            cipher = AES.new(Crypto._KEYS['aes'], AES.MODE_GCM, nonce=Crypto._KEYS['nonce'])
             return cipher.encrypt(pad(content.encode('utf8'), AES.block_size))
 
         @staticmethod
@@ -60,7 +50,7 @@ class Crypto:
             :param content: 待加密字符串
             :return: 密文的字节数组
             """
-            key = RSA.import_key(Crypto._KEYS['RSA_PRI_KEY'])
+            key = RSA.import_key(Crypto._KEYS['rsa'])
             cipher = PKCS1_OAEP.new(key)
             return cipher.encrypt(content.encode())
 
@@ -73,7 +63,7 @@ class Crypto:
             :param cipher_bytes: 密文
             :return: 解密出的明文
             """
-            cipher = AES.new(Crypto._KEYS['AES_KEY'], AES.MODE_GCM, nonce='nmd wsm'.encode())
+            cipher = AES.new(Crypto._KEYS['aes'], AES.MODE_GCM, nonce=Crypto._KEYS['nonce'])
             return unpad(cipher.decrypt(cipher_bytes), AES.block_size).decode()
 
         @staticmethod
@@ -83,6 +73,6 @@ class Crypto:
             :param cipher_bytes: 密文
             :return: 解密出的明文
             """
-            key = RSA.import_key(Crypto._KEYS['RSA_PRI_KEY'])
+            key = RSA.import_key(Crypto._KEYS['rsa'])
             cipher = PKCS1_OAEP.new(key)
             return cipher.decrypt(cipher_bytes)

@@ -8,6 +8,7 @@ def create_app():
     from .utilities.Log import Log
     from .utilities.SqlHandler import SQLHandler
     from datetime import datetime
+    from .utilities.Crypto import Crypto
 
     VERSION_CODE = '0.1.1'
     STARTUP_TIME = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -22,6 +23,12 @@ def create_app():
         'charset': app.config['DB_CHARSET']
     }
     SQLHandler().load_config(DB_CONFIG)
+    SECRET_KEYS = {
+        'aes': app.config['AES_KEY'],
+        'rsa': app.config['RSA_PRI_KEY'],
+        'nonce': app.config['AES_NONCE']
+    }
+    Crypto.load_config(SECRET_KEYS)
     for bp in BPList:
         app.register_blueprint(bp)
     CORS(app, supports_credentials=True)
