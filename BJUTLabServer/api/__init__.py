@@ -4,13 +4,12 @@ blueprints中的视图函数调用api模块的函数，返回api调用结果。�
 函数检查过参数了，所以这里的参数都是验证过的合法参数。
 """
 
-from pathlib import Path
-
 from BJUTLabServer.utilities import SQLHandler, Log
 from .Auth import AuthAPI
-from .Inform import InformAPI
 from .Experiment import ExpAPI
+from .Inform import InformAPI
 from .. import exception
+from flask import current_app
 
 
 class BJUTLabAPI:
@@ -20,12 +19,10 @@ class BJUTLabAPI:
         if BJUTLabAPI.__api_instance is not None:
             raise exception.APIReinitializationError('API')
         self._logger = Log.get_logger('BJUTLabServer.API')
-        DB_SETTING_PATH = Path(__file__).resolve().parent \
-            .parent.parent.joinpath('db.json')
-        self._sql = SQLHandler(DB_SETTING_PATH)
-        self.inform = InformAPI.get_instance(self._logger, self._sql)
-        self.auth = AuthAPI.get_instance(self._logger, self._sql)
-        self.exp = ExpAPI.get_instance(self._logger, self._sql)
+        self._sql = SQLHandler()
+        self.inform = InformAPI(self._logger, self._sql)
+        self.auth = AuthAPI(self._logger, self._sql)
+        self.exp = ExpAPI(self._logger, self._sql)
 
     @staticmethod
     def get_instance():

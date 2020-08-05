@@ -6,10 +6,11 @@ from BJUTLabServer import exception
 from ..utilities import (
     jsonify
 )
+from ..utilities.misc import singleton
 
 
+@singleton
 class InformAPI:
-    __inform_instance = None
     __get_inform_temporary_type_list = ['create', 'expire', 'principal']
     __get_inform_type_list = ['create', 'expire', 'principal']
     __get_inform_procedure_list = ['get_inform_temporary_by_id',
@@ -18,8 +19,6 @@ class InformAPI:
                                       'create_inform_long_term']
 
     def __init__(self, logger, sql):
-        if InformAPI.__inform_instance is not None:
-            raise exception.APIReinitializationError('Inform')
         self._logger = logger
         self._sql = sql
         self.__get_inform_brief_method_list = [
@@ -27,12 +26,6 @@ class InformAPI:
             self.__get_inform_long_term_brief,
             self.__get_inform_all_type_brief
         ]
-
-    @staticmethod
-    def get_instance(logger, sql):
-        if InformAPI.__inform_instance is None:
-            InformAPI.__inform_instance = InformAPI(logger, sql)
-        return InformAPI.__inform_instance
 
     def get_informs(self, type_code: int, number: int, page_index: int, filter_str: str):
         """

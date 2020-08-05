@@ -1,13 +1,5 @@
 from werkzeug import exceptions as WerkzeugException
 
-
-class APIReinitializationError(Exception):
-    """
-    当已经存在一个API模块的class(inform，etc)实例时，如果尝试创建另一个，则会抛出此异常
-    """
-    pass
-
-
 class ParameterException(WerkzeugException.HTTPException):
     """
     用于API的参数异常的情况.

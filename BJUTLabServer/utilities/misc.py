@@ -6,7 +6,7 @@ import typing
 from datetime import date
 from functools import wraps
 
-from flask import make_response, session
+from flask import make_response, session, current_app
 from werkzeug.datastructures import ImmutableMultiDict, MultiDict
 
 from .. import exception
@@ -124,6 +124,22 @@ def login_required(view):
         raise unauthorized_exception
 
     return wrapped_view
+
+
+def singleton(cls):
+    """
+    这个函数通常以装饰器的形式使用，用于将一个类限定为单例模式。
+    :param cls: 被装饰的类
+    :type cls: class
+    """
+    _instance = {}
+
+    def _singleton(*args, **kwargs):
+        if cls not in _instance:
+            _instance[cls] = cls(*args, **kwargs)
+        return _instance[cls]
+
+    return _singleton
 
 
 def jsonify(obj: object):

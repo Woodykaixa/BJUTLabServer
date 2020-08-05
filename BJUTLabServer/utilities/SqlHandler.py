@@ -1,25 +1,32 @@
 """
 `SqlHandler.py` 提供 :class:`SQLHandler` 来处理数据库操作。
 """
-import json
+from .misc import singleton
 import threading
 import pymysql
 
 from .Log import Log
 
 
+@singleton
 class SQLHandler:
     """
     `SQLHandler` 封装了 `pymysql` 的操作，使其适用于项目的存储过程。
     """
 
-    def __init__(self, conf_path: str):
+    def __init__(self):
         self._logger = Log.get_logger('BJUTLabServer.SQLHandler')
-        self._logger.info('Read database settings from path: {}'.format(conf_path))
         self.lock = threading.Lock()
-        self._db_config = SQLHandler.read_config(conf_path)
+        self._db_config = None
         self._connection = None
         self.connect_database()
+
+    def load_config(self, config: dict):
+        """
+        设置数据库连接配置，该配置存在于`config.py`中，在项目初始化时读入。
+        :param config: 数据库配置
+        """
+        self._db_config = config
 
     def connect_database(self):
         """
@@ -32,15 +39,6 @@ class SQLHandler:
             database=self._db_config['useDB'],
             charset=self._db_config['charset']
         )
-
-    @staticmethod
-    def read_config(conf_path: str):
-        """
-        从db.json中读取数据库连接参数。
-        :return: json格式的参数信息。
-        """
-        f = open(conf_path, 'r')
-        return json.load(f)
 
     def query(self, sql: str, top_n: int or str = 1):
         """

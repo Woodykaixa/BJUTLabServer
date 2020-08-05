@@ -1,22 +1,30 @@
 def create_app():
     from flask import Flask, render_template, request
     from flask_cors import CORS
+    from pathlib import Path
     from .exception import ParameterException, WerkzeugException
     from .utilities import make_error_response
     from .blueprints import BPList
     from .utilities.Log import Log
+    from .utilities.SqlHandler import SQLHandler
     from datetime import datetime
 
-    VERSION_CODE = '0.1.0'
+    VERSION_CODE = '0.1.1'
     STARTUP_TIME = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
     app = Flask('BJUTLabServer')
+    ConfigPath = Path(app.root_path).resolve().parent.joinpath('config.py')
+    app.config.from_pyfile(ConfigPath)
+    DB_CONFIG = {
+        'host': app.config['DB_HOST'],
+        'user': app.config['DB_USER'],
+        'useDB': app.config['DB_NAME'],
+        'password': app.config['DB_PASSWORD'],
+        'charset': app.config['DB_CHARSET']
+    }
+    SQLHandler().load_config(DB_CONFIG)
     for bp in BPList:
         app.register_blueprint(bp)
     CORS(app, supports_credentials=True)
-    app.config.from_mapping(
-        SECRET_KEY='afkJLSLjfljkKLS8Rsfj234LMNK'
-    )
     rules = app.url_map.iter_rules()
 
     APIs = {}

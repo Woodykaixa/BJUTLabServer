@@ -1,29 +1,21 @@
 from flask import session, g
 
-from ..exception import APIReinitializationError, ParameterException
+from ..exception import ParameterException
 from ..utilities import (
-    Encryptor,
     SQLHandler,
     jsonify
 )
+from ..utilities.misc import singleton
 
 
+@singleton
 class AuthAPI:
-    __auth_instance = None
     __change_password_proc = ['update_student_user']
     __login_proc = ['get_student_user', None, 'get_principal_by_info']
 
     def __init__(self, logger, sql: SQLHandler):
-        if AuthAPI.__auth_instance is not None:
-            raise APIReinitializationError('Auth')
         self._logger = logger
         self._sql = sql
-
-    @staticmethod
-    def get_instance(logger, sql):
-        if AuthAPI.__auth_instance is None:
-            AuthAPI.__auth_instance = AuthAPI(logger, sql)
-        return AuthAPI.__auth_instance
 
     def register_user(self, school_id: str, name: str, password: str, user_type: int):
         """

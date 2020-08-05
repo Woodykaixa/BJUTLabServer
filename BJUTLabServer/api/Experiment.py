@@ -1,15 +1,14 @@
 from datetime import date, datetime
 from typing import List
 
-from ..exception import APIReinitializationError, WerkzeugException
 from ..utilities import (
     jsonify
 )
+from ..utilities.misc import singleton
 
 
+@singleton
 class ExpAPI:
-    __exp_instance = None
-
     # 通过对这个元组使用index方法获get_labs调用存储过程时应当将filter插入到参数中的位置
     _GET_LAB_FILTER_KEYS = ('name', 'principal', 'open', 'time', 'day')
 
@@ -17,16 +16,8 @@ class ExpAPI:
     _GET_LAB_DAY_NUM_TO_CHAR = ('一', '二', '三', '四', '五', '六', '日')
 
     def __init__(self, logger, sql):
-        if ExpAPI.__exp_instance is not None:
-            raise APIReinitializationError('Experiment')
         self._logger = logger
         self._sql = sql
-
-    @staticmethod
-    def get_instance(logger, sql):
-        if ExpAPI.__exp_instance is None:
-            ExpAPI.__exp_instance = ExpAPI(logger, sql)
-        return ExpAPI.__exp_instance
 
     def get_orders(self, page_index, page_size, type_code: int, uid: str):
         """
