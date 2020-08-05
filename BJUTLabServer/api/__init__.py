@@ -8,24 +8,15 @@ from BJUTLabServer.utilities import SQLHandler, Log
 from .Auth import AuthAPI
 from .Experiment import ExpAPI
 from .Inform import InformAPI
-from .. import exception
-from flask import current_app
+from ..utilities import singleton
 
 
+@singleton
 class BJUTLabAPI:
-    __api_instance = None
 
     def __init__(self):
-        if BJUTLabAPI.__api_instance is not None:
-            raise exception.APIReinitializationError('API')
         self._logger = Log.get_logger('BJUTLabServer.API')
-        self._sql = SQLHandler()
+        self._sql = SQLHandler.get_instance()
         self.inform = InformAPI(self._logger, self._sql)
         self.auth = AuthAPI(self._logger, self._sql)
         self.exp = ExpAPI(self._logger, self._sql)
-
-    @staticmethod
-    def get_instance():
-        if BJUTLabAPI.__api_instance is None:
-            BJUTLabAPI.__api_instance = BJUTLabAPI()
-        return BJUTLabAPI.__api_instance

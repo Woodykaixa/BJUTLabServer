@@ -1,16 +1,10 @@
 def create_app():
-    from flask import Flask, render_template, request
-    from flask_cors import CORS
-    from pathlib import Path
-    from .exception import ParameterException, WerkzeugException
-    from .utilities import make_error_response
-    from .blueprints import BPList
-    from .utilities.Log import Log
-    from .utilities.SqlHandler import SQLHandler
+    from flask import Flask, render_template
     from datetime import datetime
+    from pathlib import Path
+    from .utilities.SqlHandler import SQLHandler
     from .utilities.Crypto import Crypto
 
-    VERSION_CODE = '0.1.1'
     STARTUP_TIME = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     app = Flask('BJUTLabServer')
     ConfigPath = Path(app.root_path).resolve().parent.joinpath('config.py')
@@ -22,13 +16,21 @@ def create_app():
         'password': app.config['DB_PASSWORD'],
         'charset': app.config['DB_CHARSET']
     }
-    SQLHandler().load_config(DB_CONFIG)
     SECRET_KEYS = {
         'aes': app.config['AES_KEY'],
         'rsa': app.config['RSA_PRI_KEY'],
         'nonce': app.config['AES_NONCE']
     }
+    SQLHandler.load_config(DB_CONFIG)
     Crypto.load_config(SECRET_KEYS)
+
+    from flask_cors import CORS
+    from .exception import ParameterException, WerkzeugException
+    from .utilities import make_error_response, jsonify
+    from .blueprints import BPList
+    from .utilities.Log import Log
+
+    VERSION_CODE = '0.1.1'
     for bp in BPList:
         app.register_blueprint(bp)
     CORS(app, supports_credentials=True)
@@ -46,10 +48,6 @@ def create_app():
     @app.route('/')
     def hi():
         return render_template('index.html', time=STARTUP_TIME, APIs=APIs, ver=VERSION_CODE)
-
-    @app.before_request
-    def log_visitor():
-        Log.get_logger(__name__).info('visit: [{}] from: [{}]'.format(request.url, request.host))
 
     @app.errorhandler(ParameterException)
     def handle_parameter_exception(e):

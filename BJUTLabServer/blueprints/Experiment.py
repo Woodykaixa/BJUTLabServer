@@ -14,7 +14,7 @@ from ..utilities import (
 )
 
 ExpBP = Blueprint('Experiment', __name__, url_prefix='/Experiment')
-api = BJUTLabAPI.get_instance()
+api = BJUTLabAPI()
 ACCEPTABLE_ORDER_TYPE = [0]
 
 

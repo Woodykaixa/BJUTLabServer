@@ -1,32 +1,45 @@
 """
 `SqlHandler.py` 提供 :class:`SQLHandler` 来处理数据库操作。
 """
-from .misc import singleton
+
 import threading
 import pymysql
 
 from .Log import Log
 
 
-@singleton
 class SQLHandler:
     """
     `SQLHandler` 封装了 `pymysql` 的操作，使其适用于项目的存储过程。
     """
 
-    def __init__(self):
+    _CONFIG_DICT = None
+    _instance = None
+
+    def __init__(self, config: dict):
+        if SQLHandler._instance is not None:
+            raise Exception('SQLHandler already has an instance.')
         self._logger = Log.get_logger('BJUTLabServer.SQLHandler')
         self.lock = threading.Lock()
-        self._db_config = None
+        self._db_config = config
         self._connection = None
         self.connect_database()
 
-    def load_config(self, config: dict):
+    @staticmethod
+    def load_config(config: dict):
         """
         设置数据库连接配置，该配置存在于`config.py`中，在项目初始化时读入。
         :param config: 数据库配置
         """
-        self._db_config = config
+        SQLHandler._CONFIG_DICT = config
+
+    @staticmethod
+    def get_instance():
+        if SQLHandler._CONFIG_DICT is None:
+            raise Exception('SQLHandler initialized before setting database info.')
+        if SQLHandler._instance is None:
+            SQLHandler._instance = SQLHandler(SQLHandler._CONFIG_DICT)
+        return SQLHandler._instance
 
     def connect_database(self):
         """

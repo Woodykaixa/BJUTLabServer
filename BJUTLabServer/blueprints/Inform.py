@@ -11,7 +11,7 @@ from ..utilities import (
     TIME_FORMAT
 )
 
-api = BJUTLabAPI.get_instance()
+api = BJUTLabAPI()
 
 InformBP = Blueprint('Inform', __name__, url_prefix='/Inform')
 ACCEPTABLE_INFORM_TYPE = ['0', '1']

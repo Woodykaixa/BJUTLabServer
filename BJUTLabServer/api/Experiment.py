@@ -2,9 +2,9 @@ from datetime import date, datetime
 from typing import List
 
 from ..utilities import (
-    jsonify
+    jsonify,
+    singleton
 )
-from ..utilities.misc import singleton
 
 
 @singleton

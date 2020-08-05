@@ -4,9 +4,9 @@ from flask import session
 
 from BJUTLabServer import exception
 from ..utilities import (
-    jsonify
+    jsonify,
+    singleton
 )
-from ..utilities.misc import singleton
 
 
 @singleton

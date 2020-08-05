@@ -15,7 +15,7 @@ from ..utilities import (
 
 AuthBP = Blueprint('Auth', __name__, url_prefix='/Auth')
 
-api = BJUTLabAPI.get_instance()
+api = BJUTLabAPI()
 logger = Log.get_logger(__name__)
 ACCEPTABLE_USER_TYPE = ['0', '2']
 

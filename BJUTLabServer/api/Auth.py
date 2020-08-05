@@ -3,9 +3,9 @@ from flask import session, g
 from ..exception import ParameterException
 from ..utilities import (
     SQLHandler,
-    jsonify
+    jsonify,
+    singleton
 )
-from ..utilities.misc import singleton
 
 
 @singleton
