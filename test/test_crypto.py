@@ -25,9 +25,13 @@ def test_md5():
 
 
 def test_rsa():
-    HeiseiDebtKing = '戦え！ウルトラマンオーブ！'.encode()  # ?
+    HeiseiDebtKing = '世界中が君を信じてる、二つのパワーで、戦え！ウルトラマンオーブ！'.encode()  # ?
     key = RSA.import_key(rsa_key)
     pub_key = key.publickey()
-    pub_cipher = PKCS1_OAEP.new(pub_key)
-    cipher_bytes = pub_cipher.encrypt(HeiseiDebtKing)
+    cipher_array = []
+    cipher = PKCS1_OAEP.new(pub_key)
+    for i in range(0, len(HeiseiDebtKing), 200):
+        cipher_array.append(cipher.encrypt(HeiseiDebtKing[i:i + 200]))
+    cipher_bytes = b''.join(cipher_array)
     assert Crypto.Decrypt.rsa(cipher_bytes) == HeiseiDebtKing
+    # 由于pycryptodome不能用公钥解密（虽然是用私钥加密的），所以没法测试Crypto.Encrypt.rsa()

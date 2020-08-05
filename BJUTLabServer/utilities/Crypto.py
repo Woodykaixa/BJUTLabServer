@@ -9,10 +9,9 @@ from Crypto.Cipher import AES, PKCS1_OAEP
 
 class Crypto:
     """
-    提供加密方法。
+    提供加密和解密。
     """
     _KEYS = None
-    _AES_CIPHER = None
 
     @staticmethod
     def load_config(secret_keys: dict):
@@ -50,9 +49,14 @@ class Crypto:
             :param content: 待加密字符串
             :return: 密文的字节数组
             """
+            content_byte = content.encode()
+            BLOCK_SIZE = 200
+            result = []
             key = RSA.import_key(Crypto._KEYS['rsa'])
             cipher = PKCS1_OAEP.new(key)
-            return cipher.encrypt(content.encode())
+            for i in range(0, len(content_byte), BLOCK_SIZE):
+                result.append(cipher.encrypt(content_byte[i:i + BLOCK_SIZE]))
+            return b''.join(result)
 
     class Decrypt:
 
@@ -73,6 +77,10 @@ class Crypto:
             :param cipher_bytes: 密文
             :return: 解密出的明文
             """
+            BLOCK_SIZE = 256
+            result = []
             key = RSA.import_key(Crypto._KEYS['rsa'])
             cipher = PKCS1_OAEP.new(key)
-            return cipher.decrypt(cipher_bytes)
+            for i in range(0, len(cipher_bytes), BLOCK_SIZE):
+                result.append(cipher.decrypt(cipher_bytes[i:i + BLOCK_SIZE]))
+            return b''.join(result)
