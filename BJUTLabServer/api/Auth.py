@@ -59,7 +59,7 @@ class AuthAPI:
         :param password: 姓名
         :param user_type: 用户类型
         """
-        proc_name = AuthAPI.__login_proc[user_type]
+        proc_name = self.__login_proc[user_type]
         dataset, code = self._sql.run_proc(proc_name, 1, (school_id, password))
         self._logger.info(str(dataset))
         self._logger.info(code)
@@ -91,7 +91,7 @@ class AuthAPI:
         :param new: 新密码
         """
         if old == session['password']:
-            proc_name = AuthAPI.__change_password_proc[session['type']]
+            proc_name = self.__change_password_proc[session['type']]
             school_id = session['id']
             name = session['name']
             dataset, code = self._sql.run_proc(proc_name, 1, (school_id, name, new))

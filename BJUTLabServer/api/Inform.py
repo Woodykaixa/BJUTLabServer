@@ -72,7 +72,7 @@ class InformAPI:
             filter_param = [None, None]
 
             try:
-                type_code_index = InformAPI.__get_inform_temporary_type_list.index(filter_pair[0])
+                type_code_index = self.__get_inform_temporary_type_list.index(filter_pair[0])
                 filter_param.insert(type_code_index, filter_pair[1])
             except ValueError as e:
                 raise exception.ParameterException(400, 'Invalid filter: {}'.format(e))
@@ -96,7 +96,7 @@ class InformAPI:
             filter_param = [0, None]
 
             try:
-                type_code_index = InformAPI.__get_inform_type_list.index(filter_pair[0])
+                type_code_index = self.__get_inform_type_list.index(filter_pair[0])
                 filter_param.insert(type_code_index, filter_pair[1])
             except ValueError as e:
                 raise exception.ParameterException(400, 'Invalid filter: {}'.format(e))
@@ -128,7 +128,7 @@ class InformAPI:
         :param inform_id: 通知id
         """
         try:
-            proc_name = InformAPI.__get_inform_procedure_list[type_code]
+            proc_name = self.__get_inform_procedure_list[type_code]
             dataset, code = self._sql.run_proc(proc_name, 1, (inform_id,))
             self._logger.info('dataset: ' + str(dataset))
             self._logger.info('return code: ' + str(code))
@@ -164,7 +164,7 @@ class InformAPI:
         :param nullable_expire: 通知过期时间（只有选择发布临时通知时，需要传递此参数）
         """
         principal = session['id']
-        proc = InformAPI.__create_inform_procedure_list[type_code]
+        proc = self.__create_inform_procedure_list[type_code]
         param = [title, content, create, principal]
         if type_code == 0:
             param.insert(2, nullable_expire)

@@ -10,10 +10,10 @@ from ..utilities import (
 @singleton
 class ExpAPI:
     # 通过对这个元组使用index方法获get_labs调用存储过程时应当将filter插入到参数中的位置
-    _GET_LAB_FILTER_KEYS = ('name', 'principal', 'open', 'time', 'day')
+    __get_lab_filter_keys = ('name', 'principal', 'open', 'time', 'day')
 
-    _GET_ORDER_RECORD_PROC = ('get_student_order_record',)
-    _GET_LAB_DAY_NUM_TO_CHAR = ('一', '二', '三', '四', '五', '六', '日')
+    __get_order_record_proc = ('get_student_order_record',)
+    __get_lab_day_num_to_char = ('一', '二', '三', '四', '五', '六', '日')
 
     def __init__(self, logger, sql):
         self._logger = logger
@@ -144,12 +144,12 @@ class ExpAPI:
             param.append(None)
         else:
             k, v = filter_str.split('->')
-            pos = ExpAPI._GET_LAB_FILTER_KEYS.index(k)
+            pos = self.__get_lab_filter_keys.index(k)
             if k == 'day':
                 insert_value = ''
                 for i in range(1, 8):
                     if str(i) in v:
-                        insert_value += ExpAPI._GET_LAB_DAY_NUM_TO_CHAR[i - 1]
+                        insert_value += self.__get_lab_day_num_to_char[i - 1]
             elif k == 'open':
                 insert_value = bool(v)
             else:

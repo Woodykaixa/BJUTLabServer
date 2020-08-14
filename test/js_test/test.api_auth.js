@@ -42,7 +42,7 @@ describe('测试Auth API', () => {
                 });
         });
         it('实验室管理员登录', (done) => {
-            postTo('/Auth/login', getLoginForm('G18074104', 'ASDads64770', 2))
+            postTo('/Auth/login', getLoginForm('12345', 'ASDads64770', 2))
                 .then(res => {
                     done();
                     expect(res.status).to.eql(200)
