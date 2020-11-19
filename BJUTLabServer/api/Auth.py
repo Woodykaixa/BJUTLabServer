@@ -17,7 +17,7 @@ class AuthAPI:
         self._logger = logger
         self._sql = sql
 
-    def register_user(self, school_id: str, name: str, password: str, user_type: int):
+    def register_user(self, school_id: str, name: str, password: str, user_type: int, phone_num: str):
         """
         注册用户。
 
@@ -25,9 +25,10 @@ class AuthAPI:
         :param name: 姓名
         :param password: 密码（加密后）
         :param user_type: 注册类型
+        :param phone_num: 用户的手机号
         """
         proc_name = 'create_student_user'
-        dataset, code = self._sql.run_proc(proc_name, 1, (school_id, name, password))
+        dataset, code = self._sql.run_proc(proc_name, 1, (school_id, name, password, phone_num))
         return {
             'return code': code
         }

@@ -4,3 +4,4 @@ venv/
 **.json
 config.py
 BJUTLabServerPrivateKey.pem
+**/__pycache__

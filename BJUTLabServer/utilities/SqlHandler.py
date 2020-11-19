@@ -94,7 +94,8 @@ class SQLHandler:
         """
         调用存储过程。返回结果集以及一个 `OUT` 参数。BJUTLab的存储过程均有且只有一个 `OUT` 参数。
         :param proc_name: 存储过程名
-        :param top_n: 取前n条结果（如果记录数量大于n，则只返回前n条结果，否则返回全部结果）
+        :param top_n: 取前n条结果（如果top_n为-1，返回所有结果；如果top_n >=0：
+                      记录数量大于n，则只返回前n条结果，否则返回全部结果）
         :param param: 存储过程参数，不需要设置最后一个OUT参数
         """
         try:
@@ -103,7 +104,10 @@ class SQLHandler:
             self._logger.info(('run_proc:: param: {}'.format(param)))
             cursor = self._connection.cursor()
             cursor.callproc(proc_name, param + (10,))
-            res = cursor.fetchmany(top_n)
+            if top_n == -1:
+                res = cursor.fetchmany()
+            else:
+                res = cursor.fetchmany(top_n)
             cursor.execute('select @_' + proc_name + '_' + str(len(param)))
             out_param = cursor.fetchone()
             cursor.connection.commit()

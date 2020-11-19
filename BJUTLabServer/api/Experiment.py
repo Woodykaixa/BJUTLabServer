@@ -19,7 +19,7 @@ class ExpAPI:
         self._logger = logger
         self._sql = sql
 
-    def get_orders(self, page_index, page_size, type_code: int, uid: str):
+    def get_orders(self, type_code: int, uid: str):
         """
         用于用户查询自己的预约记录或管理员查询自己实验室的预约记录。
 
@@ -32,18 +32,16 @@ class ExpAPI:
             能的按钮，获取关于一个实验室的所有预约记录，同样，这个实验室必须是负责人本人
             负责的，否则只会返回一个空集。
 
-        :param page_index: 分页下标
-        :param page_size: 每页显示的记录数量
         :param type_code: 用户类型，从session['type']获取
         :param uid: 用户id，从session['id']获取
         """
         proc_name = 'get_lab_order_record'
         if type_code < 2:
-            param = (page_size, page_index, uid, 0, 0, 0, 0, 0)
+            param = (uid, 0, 0, 0, 0, 0)
         else:
             dataset, record_count = self._sql.query(f'select lab_id from labs where principal_sid = {uid}')
-            param = (page_size, page_index, 0, 0, 0, 0, dataset[0][0], 0)
-        dataset, count = self._sql.run_proc(proc_name, page_size, param)
+            param = (0, 0, 0, 0, dataset[0][0], 0)
+        dataset, count = self._sql.run_proc(proc_name, -1, param)
         self._logger.info('dataset: {}'.format(dataset))
         self._logger.info('count: {}'.format(count))
         order_list = []
@@ -125,7 +123,7 @@ class ExpAPI:
             'return code': code
         })
 
-    def get_labs(self, page_index: int, number: int, filter_str: str or None):
+    def get_labs(self, filter_str: str or None):
         """
         获取所有实验室的简略信息。filter是为了实现实验室查找功能而扩展的参数，可
         以通过filter实现条件过滤。
@@ -134,12 +132,10 @@ class ExpAPI:
 
             用户选择想要预约的实验室时，前端调用此api获取所有实验室信息。
 
-        :param page_index: 分页的下标
-        :param number: 每页显示数量
         :param filter_str: 过滤条件
         """
         proc_name = 'get_lab'
-        param = [number, page_index, None, None, None, None]
+        param = [None, None, None, None]
         if filter_str is None:
             param.append(None)
         else:
@@ -155,7 +151,7 @@ class ExpAPI:
             else:
                 insert_value = v
             param.insert(pos + 2, insert_value)
-        dataset, count = self._sql.run_proc(proc_name, number, tuple(param))
+        dataset, count = self._sql.run_proc(proc_name, -1, tuple(param))
         self._logger.debug(f'get_labs::dataset: {dataset}')
         return_data = []
         for record in dataset:

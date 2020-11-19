@@ -7,6 +7,7 @@ from ..exception import InvalidParameter
 from ..utilities import (
     Log,
     post_validate_param,
+    get_validate_param,
     Validator,
     login_required,
     STUDENT_ID_STRING_FORMAT,
@@ -29,12 +30,13 @@ def register_user():
     password = post_validate_param(form, 'password')
     user_type = post_validate_param(form, 'type', Validator.acceptable_types,
                                     (ACCEPTABLE_USER_TYPE,))
+    phone_num = post_validate_param(form, 'phone', Validator.string_format, (Validator.phone_number_format,))
 
     if (user_type == '0' and not re.match(STUDENT_ID_STRING_FORMAT, school_id)) or \
             (user_type != '0' and not re.match(TEACHER_ID_STRING_FORMAT, school_id)):
         raise InvalidParameter(400, 'id has wrong format.')
 
-    return api.auth.register_user(school_id, name, password, int(user_type))
+    return api.auth.register_user(school_id, name, password, int(user_type), phone_num)
 
 
 @AuthBP.route('/register/principal', methods=['POST'])
@@ -45,7 +47,7 @@ def register_principal():
     name = post_validate_param(form, 'name', Validator.string_length, ((1, 10),))
     password = post_validate_param(form, 'password')
     office = post_validate_param(form, 'office', Validator.string_length, ((1, 15),))
-    phone = post_validate_param(form, 'phone', Validator.string_length, ((11, 11),))
+    phone = post_validate_param(form, 'phone', Validator.string_format, (Validator.phone_number_format,))
     email = post_validate_param(form, 'email', Validator.string_format,
                                 (r'^[0-9a-zA-Z]+@([0-9a-zA-Z]+\.)+[0-9a-zA-Z]{2,6}$',))
 

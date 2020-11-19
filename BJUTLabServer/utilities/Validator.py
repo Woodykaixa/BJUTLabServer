@@ -20,6 +20,7 @@ class Validator:
     __ValidateResult = (bool, Exception or None)
 
     school_id_format = r'^(\d{8}|\d{5})$'
+    phone_number_format = r'^1\d{10}$'
 
     @staticmethod
     def string_format(param: Tuple[str, str, str]) -> __ValidateResult:

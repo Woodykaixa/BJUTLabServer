@@ -27,7 +27,7 @@ class InformAPI:
             self.__get_inform_all_type_brief
         ]
 
-    def get_informs(self, type_code: int, number: int, page_index: int, filter_str: str):
+    def get_informs(self, type_code: int, filter_str: str):
         """
         获取所有通知的简略信息。可以通过filter_str实现条件过滤。
 
@@ -36,13 +36,11 @@ class InformAPI:
             向用户展示所有通知的清单时，调用此api获取所有通知的简略信息。
 
         :param type_code: 通知类型
-        :param number: 每页显示的数量
-        :param page_index: 分页下标
         :param filter_str: 过滤条件
         """
         try:
             api_get_inform_brief = self.__get_inform_brief_method_list[type_code]
-            return jsonify(api_get_inform_brief(number, page_index, filter_str))
+            return jsonify(api_get_inform_brief(filter_str))
         except IndexError:
             raise exception.ParameterException(400, 'Unknown type: {}'.format(type_code))
 
@@ -61,12 +59,12 @@ class InformAPI:
             informs.append(inform_brief)
         return informs
 
-    def __get_inform_temporary_brief(self, number, page_index, filter_str):
-        param = (number, page_index)
+    def __get_inform_temporary_brief(self, filter_str):
+        param = ()
         proc_name = 'get_inform_temporary_by_filter'
 
         if filter_str is None:
-            dataset, count = self._sql.run_proc(proc_name, number, param + (None, None, None))
+            dataset, count = self._sql.run_proc(proc_name, -1, param + (None, None, None))
         else:
             filter_pair = str(filter_str).split('->')
             filter_param = [None, None]
@@ -80,17 +78,17 @@ class InformAPI:
             param_final = param + tuple(filter_param)
             self._logger.info('proc: ' + proc_name)
             self._logger.info('param: ' + str(param_final))
-            dataset, count = self._sql.run_proc(proc_name, number, param_final)
+            dataset, count = self._sql.run_proc(proc_name, -1, param_final)
 
         informs = self.__parse_dataset_for_get_inform_brief(dataset, 0)
         return informs
 
-    def __get_inform_long_term_brief(self, number, page_index, filter_str):
+    def __get_inform_long_term_brief(self, filter_str):
         proc_name = 'get_inform_long_term_by_filter'
-        param = (number, page_index)
+        param = ()
 
         if filter_str is None:
-            dataset, count = self._sql.run_proc(proc_name, number, param + (None, None))
+            dataset, count = self._sql.run_proc(proc_name, -1, param + (None, None))
         else:
             filter_pair = str(filter_str).split('->')
             filter_param = [0, None]
@@ -102,15 +100,15 @@ class InformAPI:
                 raise exception.ParameterException(400, 'Invalid filter: {}'.format(e))
 
             param_final = param + tuple(filter_param)
-            dataset, count = self._sql.run_proc(proc_name, number, param_final)
+            dataset, count = self._sql.run_proc(proc_name, -1, param_final)
 
         informs = self.__parse_dataset_for_get_inform_brief(dataset, 1)
         return informs
 
-    def __get_inform_all_type_brief(self, number, page_index, filter_str):
+    def __get_inform_all_type_brief(self, filter_str):
         inform = []
-        inform_temp = self.__get_inform_temporary_brief(number, page_index, filter_str)
-        inform_long = self.__get_inform_long_term_brief(number, page_index, filter_str)
+        inform_temp = self.__get_inform_temporary_brief(filter_str)
+        inform_long = self.__get_inform_long_term_brief(filter_str)
         inform.extend(inform_temp)
         inform.extend(inform_long)
         return inform

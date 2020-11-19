@@ -21,11 +21,7 @@ ACCEPTABLE_ORDER_TYPE = [0]
 @ExpBP.route('/orders', methods=['GET'])
 @login_required
 def get_orders():
-    args = request.args
-    page_index = get_validate_param(args, 'pageIndex', int, Validator.digit_in_range, ((1, None),))
-    page_size = get_validate_param(args, 'size', int, Validator.digit_in_range, ((1, None),))
-
-    return api.exp.get_orders(page_index, page_size, session['type'], session['id'])
+    return api.exp.get_orders(session['type'], session['id'])
 
 
 @ExpBP.route('/order', methods=['GET'])
@@ -57,12 +53,10 @@ def create_order():
 @ExpBP.route('/labs', methods=['GET'])
 def get_labs():
     args = request.args
-    number = get_validate_param(args, 'number', int, Validator.digit_in_range, ((1, None),))
-    page_index = get_validate_param(args, 'pageIndex', int, Validator.digit_in_range, ((1, None),))
     filter_str = get_validate_param(args, 'filter', str, Validator.string_format, (
         r'^(name->\w{1,30}|principal->{' + TEACHER_ID_FORMAT +
         r'}|open->[01]|time->\d{2}:\d{2}~\d{2}:\d{2}|day->[1-7]{1,7})$',), True)
-    return api.exp.get_labs(page_index, number, filter_str)
+    return api.exp.get_labs(filter_str)
 
 
 @ExpBP.route('/lab/<int:lab_id>', methods=['GET'])
